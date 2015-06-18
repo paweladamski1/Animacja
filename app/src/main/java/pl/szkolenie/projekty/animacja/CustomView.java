@@ -11,7 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class CustomView extends View{
-    float x=50,y=50;
+
     ThreadFrame thread;
     public CustomView(Context context) {
         super(context);
@@ -41,8 +41,8 @@ public class CustomView extends View{
     public boolean onTouchEvent(MotionEvent event) {
 
         float tx= event.getX(), ty=event.getY();
-        float rx=tx-x;
-        float ry=ty-y;
+        float rx=tx-thread.x;
+        float ry=ty-thread.y;
         LOG_Kulka(rx, ry);
         switch(thread.kierunek)
         {
@@ -60,11 +60,33 @@ public class CustomView extends View{
             case Lewa:
                 if(rx>0 && ry>-50 && ry<50 )
                     thread.kierunek=EKierunek.Prawa;
+                else
+                    if(ry>50)
+                        thread.kierunek=EKierunek.Dol;
+                    else
+                        if(ry<-50)
+                            thread.kierunek=EKierunek.Gora;
 
                 break;
             case Gora:
+                if(ry>0 && rx>-50 && rx<50 )
+                    thread.kierunek=EKierunek.Dol;
+                else
+                    if(rx>50)
+                        thread.kierunek=EKierunek.Prawa;
+                    else
+                        if(rx<-50)
+                            thread.kierunek=EKierunek.Lewa;
                 break;
             case Dol:
+                if(ry<0 && rx>-50 && rx<50 )
+                    thread.kierunek=EKierunek.Gora;
+                else
+                    if(rx>50)
+                        thread.kierunek=EKierunek.Prawa;
+                    else
+                        if(rx<-50)
+                            thread.kierunek=EKierunek.Lewa;
                 break;
         }
 
@@ -83,16 +105,19 @@ public class CustomView extends View{
         paint.setColor(Color.WHITE);
         canvas.drawPaint(paint);/*/
         // Use Color.parseColor to define HTML colors
-        paint.setColor(Color.parseColor("#0000FF"));
+        paint.setColor(thread.color);
         paint.setAntiAlias(true);
 
-        canvas.drawCircle(x, y, 50, paint);
+        canvas.drawCircle(thread.x, thread.y, thread.r, paint);
         invalidate();
     }
 
-    public class ThreadFrame extends Thread {
 
+    public class ThreadFrame extends Thread {
+        float x=50,y=50, r=50;
+        int color=Color.parseColor("#0000FF");
         EKierunek kierunek= EKierunek.Prawa;
+        boolean isParent=false;
 
         public boolean activ = true;
         public boolean Enabled = true;
@@ -100,7 +125,6 @@ public class CustomView extends View{
 
         //constructor
         public ThreadFrame() {
-
         }
 
         @Override
@@ -111,25 +135,25 @@ public class CustomView extends View{
                 switch ( kierunek)
                 {
                     case Prawa:
-                        if (x > getWidth()-50)
+                        if (x > getWidth()-r)
                             kierunek=EKierunek.Dol;
                         else
                             x+=15;
                         break;
                     case Lewa:
-                        if (x <50)
+                        if (x <r)
                             kierunek=EKierunek.Gora;
                         else
                             x-=15;
                         break;
                     case Gora:
-                        if (y <50)
+                        if (y <r)
                             kierunek=EKierunek.Prawa;
                         else
                             y-=15;
                         break;
                     case Dol:
-                        if(y>getHeight()-50)
+                        if(y>getHeight()-r)
                             kierunek=EKierunek.Lewa;
                         else
                             y+=15;
