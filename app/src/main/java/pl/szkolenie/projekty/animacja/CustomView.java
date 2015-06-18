@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.NumberPicker;
 
 public class CustomView extends View{
     int x=50,y=50;
@@ -35,5 +36,58 @@ public class CustomView extends View{
 
         canvas.drawCircle(x, y, 50, paint);
         invalidate();
+    }
+
+    public class ThreadFrame extends Thread {
+
+        public boolean activ = true;
+        public boolean Enabled = true;
+        int sleepValue = 500;
+        private NumberPicker view;
+
+        //constructor
+        public ThreadFrame() {
+
+        }
+
+        @Override
+        public void run() {
+            boolean vLeft = true;
+            while (true) {
+                if (vLeft) {
+                    x-=15;
+                    if (x < 0)
+                        vLeft = false;
+                } else {
+                    x+=15;
+                    if (x > getWidth())
+                        vLeft = true;
+                }
+
+                MainActivity.This.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //  postInvalidate ();
+                    }
+                });
+
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+
+                }
+            }
+        }
+
+        @Override
+        public synchronized void start() {
+            activ = true;
+            super.start();
+
+        }
+
+        public void SetSleepValue(int newValue) {
+            this.sleepValue = newValue;
+        }
     }
 }
