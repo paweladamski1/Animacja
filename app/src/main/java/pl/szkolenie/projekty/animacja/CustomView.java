@@ -6,10 +6,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class CustomView extends View{
-    int x=50,y=50;
+    float x=50,y=50;
     ThreadFrame thread;
     public CustomView(Context context) {
         super(context);
@@ -36,6 +38,45 @@ public class CustomView extends View{
     }
 
     @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        float tx= event.getX(), ty=event.getY();
+        float rx=tx-x;
+        float ry=ty-y;
+        LOG_Kulka(rx, ry);
+        switch(thread.kierunek)
+        {
+            case Prawa:
+                if(rx<0 && ry>-50 && ry<50 )
+                    thread.kierunek=EKierunek.Lewa;
+                else
+                    if(ry>50)
+                        thread.kierunek=EKierunek.Dol;
+                    else
+                        if(ry<-50)
+                            thread.kierunek=EKierunek.Gora;
+
+                break;
+            case Lewa:
+                if(rx>0 && ry>-50 && ry<50 )
+                    thread.kierunek=EKierunek.Prawa;
+
+                break;
+            case Gora:
+                break;
+            case Dol:
+                break;
+        }
+
+        return super.onTouchEvent(event);
+    }
+    private void LOG_Kulka(float rx, float ry)
+    {
+        Log.d("Animacja", thread.kierunek+" rx="+rx+"; ry="+ry);
+    }
+
+
+    @Override
     protected void onDraw(Canvas canvas) {
         Paint paint = new Paint();
      /*   paint.setStyle(Paint.Style.FILL);
@@ -50,7 +91,9 @@ public class CustomView extends View{
     }
 
     public class ThreadFrame extends Thread {
-        boolean vLeft = false, vUp = false, vHorizontal=true;
+
+        EKierunek kierunek= EKierunek.Prawa;
+
         public boolean activ = true;
         public boolean Enabled = true;
         int sleepValue = 20;
@@ -65,43 +108,34 @@ public class CustomView extends View{
 
             while (true)
             {
-                if (vHorizontal)
+                switch ( kierunek)
                 {
-                    if (vLeft)
-                    {
-                        x -= 15;
-                        if (x < 50) {
-                            vLeft = false;
-                            vHorizontal = !vHorizontal;
-
-                        }
-                    }else
-                    {
-                        x += 15;
-                        if (x > getWidth() - 50) {
-                            vLeft = true;
-                            vHorizontal = !vHorizontal;
-                        }
-                    }
-                } else
-                {
-                    if (vUp)
-                    {
-                        y -= 15;
-                        if (y < 50)
-                        {
-                            vUp = false;
-                            vHorizontal = !vHorizontal;
-                        }
-                    } else
-                    {
-                        y += 15;
-                        if (y > getHeight() - 50) {
-                            vUp = true;
-                            vHorizontal = !vHorizontal;
-                        }
-                    }
+                    case Prawa:
+                        if (x > getWidth()-50)
+                            kierunek=EKierunek.Dol;
+                        else
+                            x+=15;
+                        break;
+                    case Lewa:
+                        if (x <50)
+                            kierunek=EKierunek.Gora;
+                        else
+                            x-=15;
+                        break;
+                    case Gora:
+                        if (y <50)
+                            kierunek=EKierunek.Prawa;
+                        else
+                            y-=15;
+                        break;
+                    case Dol:
+                        if(y>getHeight()-50)
+                            kierunek=EKierunek.Lewa;
+                        else
+                            y+=15;
+                        break;
                 }
+
                 try {
                     Thread.sleep(sleepValue);
                 } catch (InterruptedException e) {
@@ -114,4 +148,7 @@ public class CustomView extends View{
             this.sleepValue = newValue;
         }
     }
+
+    enum  EKierunek{ Prawa, Lewa, Gora, Dol}
+
 }
