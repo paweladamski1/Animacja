@@ -221,9 +221,9 @@ public class CustomView extends View{
                             x=parent.x;
                             if(parent.kierunek==EKierunek.Gora)
                             {
-                                y=parent.y+parent.r+r;
+                                y=parent.y+(parent.r+r);
                             }else
-                                y=parent.y-(parent.r)+r;
+                                y=parent.y-(parent.r+r);
                         }
                     }
                     break;
