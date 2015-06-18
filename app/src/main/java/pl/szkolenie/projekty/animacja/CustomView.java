@@ -50,7 +50,7 @@ public class CustomView extends View{
     }
 
     public class ThreadFrame extends Thread {
-
+        boolean vLeft = false, vUp = false, vHorizontal=true;
         public boolean activ = true;
         public boolean Enabled = true;
         int sleepValue = 20;
@@ -62,25 +62,46 @@ public class CustomView extends View{
 
         @Override
         public void run() {
-            boolean vLeft = true;
-            while (true) {
-                if (vLeft) {
-                    x-=15;
-                    if (x < 0)
-                        vLeft = false;
-                } else {
-                    x+=15;
-                    if (x > getWidth())
-                        vLeft = true;
-                }
 
-               /* MainActivity.This.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //  postInvalidate ();
+            while (true)
+            {
+                if (vHorizontal)
+                {
+                    if (vLeft)
+                    {
+                        x -= 15;
+                        if (x < 50) {
+                            vLeft = false;
+                            vHorizontal = !vHorizontal;
+
+                        }
+                    }else
+                    {
+                        x += 15;
+                        if (x > getWidth() - 50) {
+                            vLeft = true;
+                            vHorizontal = !vHorizontal;
+                        }
                     }
-                });*/
-
+                } else
+                {
+                    if (vUp)
+                    {
+                        y -= 15;
+                        if (y < 50)
+                        {
+                            vUp = false;
+                            vHorizontal = !vHorizontal;
+                        }
+                    } else
+                    {
+                        y += 15;
+                        if (y > getHeight() - 50) {
+                            vUp = true;
+                            vHorizontal = !vHorizontal;
+                        }
+                    }
+                }
                 try {
                     Thread.sleep(sleepValue);
                 } catch (InterruptedException e) {
