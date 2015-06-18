@@ -235,6 +235,11 @@ public class CustomView extends View{
                         {
                             kierunek = parent.kierunek;
                             x=parent.x;
+                            if(parent.kierunek==EKierunek.Gora)
+                            {
+                                y=parent.y+(parent.r+r);
+                            }else
+                                y=parent.y-(parent.r+r);
                         }
 
                     }
@@ -246,6 +251,11 @@ public class CustomView extends View{
                         if(y<=parent.y ) {
                             kierunek = parent.kierunek;
                             y=parent.y;
+                            if(parent.kierunek==EKierunek.Lewa)
+                            {
+                                x=parent.x+(parent.r+r);
+                            }else
+                                x=parent.x-(parent.r+r);
                         }
                     }
                     break;
@@ -256,6 +266,11 @@ public class CustomView extends View{
                         if(y>=parent.y ) {
                             kierunek = parent.kierunek;
                             y=parent.y;
+                            if(parent.kierunek==EKierunek.Lewa)
+                            {
+                                x=parent.x+(parent.r+r);
+                            }else
+                                x=parent.x-(parent.r+r);
                         }
                     }
                     break;
