@@ -7,21 +7,32 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.NumberPicker;
 
 public class CustomView extends View{
     int x=50,y=50;
-
+    ThreadFrame thread;
     public CustomView(Context context) {
         super(context);
+        init();
     }
 
     public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init();
     }
 
     public CustomView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init();
+    }
+
+    void init()
+    {
+        if(thread==null) {
+            thread = new ThreadFrame();
+            thread.start();
+        }
+
     }
 
     @Override
@@ -42,8 +53,7 @@ public class CustomView extends View{
 
         public boolean activ = true;
         public boolean Enabled = true;
-        int sleepValue = 500;
-        private NumberPicker view;
+        int sleepValue = 20;
 
         //constructor
         public ThreadFrame() {
@@ -64,26 +74,19 @@ public class CustomView extends View{
                         vLeft = true;
                 }
 
-                MainActivity.This.runOnUiThread(new Runnable() {
+               /* MainActivity.This.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         //  postInvalidate ();
                     }
-                });
+                });*/
 
                 try {
-                    Thread.sleep(20);
+                    Thread.sleep(sleepValue);
                 } catch (InterruptedException e) {
 
                 }
             }
-        }
-
-        @Override
-        public synchronized void start() {
-            activ = true;
-            super.start();
-
         }
 
         public void SetSleepValue(int newValue) {
