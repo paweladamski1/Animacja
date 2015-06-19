@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class CustomView extends View{
     static String TAG="Animacja";
@@ -133,8 +134,14 @@ public class CustomView extends View{
     protected void onDraw(Canvas c) {
 
         //rysowanie wê¿a na ekranie
-        for(PartOfBodySnake p:SnakeBody)
-            p.Paint(c);
+        try {
+            for (PartOfBodySnake p : SnakeBody)
+                p.Paint(c);
+        }
+        catch(Exception ex)
+        {
+
+        }
 
         //rysowanie pokarmu
         Food.Paint(c);
@@ -183,7 +190,7 @@ public class CustomView extends View{
 
         PartOfBodySnake parent=null;
 
-        boolean isFood=false, checkForAdd=false, colisionDetect=false;
+        boolean isFood=false, colisionDetect=false;
         float x=50,y=75, r=50;
         int color=Color.parseColor("#0000FF");
         private EKierunek kierunek= EKierunek.Prawa;
@@ -241,15 +248,19 @@ public class CustomView extends View{
 
                 if(isColision(Food) && !Food.colisionDetect)
                 {
-                    /*Food.x=50;
-                    Food.y=600;*/
+
                     Log.d(TAG, "Kolizja");
                     Food.colisionDetect=true;//bloakada aby nie mozna bylo wykryc kolizji w kolejnej petli
 
                     PartOfBodySnake last= SnakeBody.get(SnakeBody.size()-1);//pobieramy ogon
-                    last.checkForAdd=true;//ustawiamy wlasciwosc aby zadzialal mechanizm wstawienia kiedy wykryje
+                    last.Add();
+                    Random g = new Random();
+                    Food.x=g.nextInt(500);
+                    Food.y=g.nextInt(500);
 
-                }
+                }else
+                 if(!isColision(Food))
+                     Food.colisionDetect=false;
 
                 try {
                     Thread.sleep(sleepValue);
@@ -257,6 +268,33 @@ public class CustomView extends View{
 
                 }
             }
+        }
+
+        private void Add() {
+            //Food.x=?;
+            //Food.colisionDetect=false;
+            PartOfBodySnake n=new PartOfBodySnake(false);
+            n.x=this.x;
+            n.y=this.y;
+            n.r=45;
+            n.kierunek=kierunek;
+            switch(kierunek)
+            {
+                case Prawa:
+                    n.x-=n.r+this.r;
+                    break;
+                case Lewa:
+                    n.x+=n.r+this.r;
+                    break;
+                case Gora:
+                    n.y+=n.r+this.r;
+                    break;
+                case Dol:
+                    n.y-=n.r+this.r;
+                    break;
+            }
+            n.parent=this;
+            SnakeBody.add(n);
         }
 
         public void refreshPosition()
@@ -333,39 +371,7 @@ public class CustomView extends View{
                     }
                     break;
             }
-            if (checkForAdd)
-            {
-                if (isColision(Food))
-                {
-                    //Food.x=?;
-                    Food.colisionDetect=false;
-                    PartOfBodySnake n=new PartOfBodySnake(false);
-                    n.x=this.x;
-                    n.y=this.y;
-                    n.r=45;
-                    n.kierunek=kierunek;
-                   switch(kierunek)
-                   {
-                       case Prawa:
-                           n.x-=n.r+this.r;
-                           break;
-                       case Lewa:
-                           n.x+=n.r+this.r;
-                           break;
-                       case Gora:
-                           n.y+=n.r+this.r;
-                           break;
-                       case Dol:
-                           n.y-=n.r+this.r;
-                           break;
-                   }
-                   checkForAdd=false;
-                    n.parent=this;
-                   SnakeBody.add(n);
 
-                }
-            }
-            //this.kierunek=parent.kierunek;
         }
 
         public void SetSleepValue(int newValue) {
