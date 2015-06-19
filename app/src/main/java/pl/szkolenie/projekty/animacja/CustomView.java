@@ -13,7 +13,7 @@ import android.view.View;
 import java.util.ArrayList;
 
 public class CustomView extends View{
-
+    static String TAG="Animacja";
     PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody=new ArrayList<PartOfBodySnake>();
 
@@ -39,7 +39,7 @@ public class CustomView extends View{
 
             int sh=50*2,
                 sb=45*2;
-
+            Head.color=Color.GREEN;
             Head.x=sh+(sb*3);
             this.SnakeBody.add(Head);
 
@@ -83,10 +83,10 @@ public class CustomView extends View{
             case Prawa: {
                 //if(!(rx<0 && ry>-50 && ry<50 ))
                 if (ry > 50)
-                    Head.kierunek = EKierunek.Dol;
+                    Down();
                 else
                     if (ry < -50)
-                        Head.kierunek = EKierunek.Gora;
+                        Up();
 
                 break;
             }
@@ -94,9 +94,9 @@ public class CustomView extends View{
                 {
                     // if(!(rx>0 && ry>-50 && ry<50 ))
                     if (ry > 50)
-                        Head.kierunek = EKierunek.Dol;
+                        Down();
                     else if (ry < -50)
-                        Head.kierunek = EKierunek.Gora;
+                        Up();
 
                     break;
                 }
@@ -104,17 +104,17 @@ public class CustomView extends View{
                 //if(!(ry>0 && rx>-50 && rx<50 ))
                 {
                     if (rx > 50)
-                        Head.kierunek = EKierunek.Prawa;
+                        Right();
                     else if (rx < -50)
-                        Head.kierunek = EKierunek.Lewa;
+                        Left();
                     break;
                 }
             case Dol: {
                 //if(!(ry<0 && rx>-50 && rx<50 ))
                 if (rx > 50)
-                    Head.kierunek = EKierunek.Prawa;
+                    Right();
                 else if (rx < -50)
-                    Head.kierunek = EKierunek.Lewa;
+                    Left();
 
                 break;
             }
@@ -126,7 +126,7 @@ public class CustomView extends View{
 
     private void LOG_Kulka(float rx, float ry)
     {
-        Log.d("Animacja", Head.kierunek+" rx="+rx+"; ry="+ry);
+        //Log.d("Animacja", Head.kierunek+" rx="+rx+"; ry="+ry);
     }
 
 
@@ -151,14 +151,45 @@ public class CustomView extends View{
         Head.start();
     }
 
+    public void Left() {
+        PartOfBodySnake b1=SnakeBody.get(1);
+        float ry=Math.max(b1.y,Head.y)-Math.min(b1.y,Head.y);
+
+        if (ry>=Head.r+b1.r)
+            Head.Left();
+    }
+
+    public void Down() {
+        PartOfBodySnake b1=SnakeBody.get(1);
+        float rx=Math.max(b1.x,Head.x)-Math.min(b1.x,Head.x);
+
+        if (rx>=Head.r+b1.r)
+            Head.Down();
+    }
+
+    public void Right() {
+        PartOfBodySnake b1=SnakeBody.get(1);
+        float ry=Math.max(b1.y,Head.y)-Math.min(b1.y,Head.y);
+
+        if (ry>=Head.r+b1.r)
+            Head.Right();
+    }
+
+    public void Up() {
+        PartOfBodySnake b1=SnakeBody.get(1);
+        float rx=Math.max(b1.x,Head.x)-Math.min(b1.x,Head.x);
+
+        if (rx>=Head.r+b1.r)
+            Head.Up();
+    }
+
 
     public class PartOfBodySnake extends Thread {
 
         PartOfBodySnake parent=null;
-
         float x=50,y=75, r=50;
         int color=Color.parseColor("#0000FF");
-        EKierunek kierunek= EKierunek.Prawa;
+        private EKierunek kierunek= EKierunek.Prawa;
         boolean isParent=false;
 
         public boolean activ = true;
@@ -178,25 +209,25 @@ public class CustomView extends View{
                     switch (kierunek) {
                         case Prawa:
                             if (x > getWidth() - r)
-                                kierunek = EKierunek.Dol;
+                                Down();
                             else
                                 x += 15;
                             break;
                         case Lewa:
                             if (x < r)
-                                kierunek = EKierunek.Gora;
+                                Up();
                             else
                                 x -= 15;
                             break;
                         case Gora:
                             if (y < r)
-                                kierunek = EKierunek.Prawa;
+                                Right();
                             else
                                 y -= 15;
                             break;
                         case Dol:
                             if (y > getHeight() - r)
-                                kierunek = EKierunek.Lewa;
+                                Left();
                             else
                                 y += 15;
                             break;
@@ -220,6 +251,10 @@ public class CustomView extends View{
 
         public void refreshPosition()
         {
+            float rx,ry;
+            rx=x-parent.x;
+            ry=y-parent.y;
+
             switch (kierunek) {
                 case Prawa:
                     x += 15;
@@ -232,7 +267,9 @@ public class CustomView extends View{
                             {
                                 y=parent.y+(parent.r+r);
                             }else
-                                y=parent.y-(parent.r+r);
+                                if(parent.kierunek==EKierunek.Dol) {
+                                    y = parent.y - (parent.r + r);
+                                }
                         }
                     }
                     break;
@@ -248,9 +285,9 @@ public class CustomView extends View{
                             {
                                 y=parent.y+(parent.r+r);
                             }else
-                                y=parent.y-(parent.r+r);
+                                if(parent.kierunek==EKierunek.Dol)
+                                    y=parent.y-(parent.r+r);
                         }
-
                     }
                     break;
                 case Gora:
@@ -264,6 +301,7 @@ public class CustomView extends View{
                             {
                                 x=parent.x+(parent.r+r);
                             }else
+                            if(parent.kierunek==EKierunek.Prawa)
                                 x=parent.x-(parent.r+r);
                         }
                     }
@@ -279,7 +317,8 @@ public class CustomView extends View{
                             {
                                 x=parent.x+(parent.r+r);
                             }else
-                                x=parent.x-(parent.r+r);
+                                if(parent.kierunek==EKierunek.Prawa)
+                                    x=parent.x-(parent.r+r);
                         }
                     }
                     break;
@@ -297,6 +336,34 @@ public class CustomView extends View{
             paint.setColor(color);
             paint.setAntiAlias(true);
             c.drawCircle(x, y, r, paint);
+        }
+
+        public void Left() {
+            if(kierunek!=EKierunek.Prawa) {
+                kierunek = EKierunek.Lewa;
+                Log.d(TAG, "LEWA" );
+            }
+        }
+
+        public void Down() {
+            if(kierunek!=EKierunek.Gora) {
+                kierunek = EKierunek.Dol;
+                Log.d(TAG, "DOL" );
+            }
+        }
+
+        public void Right() {
+            if(kierunek!=EKierunek.Lewa) {
+                kierunek = EKierunek.Prawa;
+                Log.d(TAG, "PRAWA" );
+            }
+        }
+
+        public void Up() {
+            if(kierunek!=EKierunek.Dol) {
+                kierunek = EKierunek.Gora;
+                Log.d(TAG, "GORA" );
+            }
         }
     }
 

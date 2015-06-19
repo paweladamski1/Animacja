@@ -11,12 +11,13 @@ import android.widget.Button;
 public class MainActivity extends ActionBarActivity {
 
     public static MainActivity This;
+    CustomView gameView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button StartBtn=(Button)findViewById(R.id.StartBtn);
-        final CustomView gameView=(CustomView)findViewById(R.id.GameView);
+        gameView=(CustomView)findViewById(R.id.GameView);
 
         StartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,5 +48,21 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void LeftClick(View view) {
+        gameView.Left();
+    }
+
+    public void DownClick(View view) {
+        gameView.Down();
+    }
+
+    public void RightClick(View view) {
+        gameView.Right();
+    }
+
+    public void UpClick(View view) {
+        gameView.Up();
     }
 }
