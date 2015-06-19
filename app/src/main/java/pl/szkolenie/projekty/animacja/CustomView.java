@@ -182,7 +182,8 @@ public class CustomView extends View{
     public class PartOfBodySnake extends Thread {
 
         PartOfBodySnake parent=null;
-        boolean isFood=false;
+
+        boolean isFood=false, checkForAdd=false, colisionDetect=false;
         float x=50,y=75, r=50;
         int color=Color.parseColor("#0000FF");
         private EKierunek kierunek= EKierunek.Prawa;
@@ -238,11 +239,15 @@ public class CustomView extends View{
                         p.refreshPosition();
                 }
 
-                if(isColision(Food))
+                if(isColision(Food) && !Food.colisionDetect)
                 {
                     /*Food.x=50;
                     Food.y=600;*/
                     Log.d(TAG, "Kolizja");
+                    Food.colisionDetect=true;//bloakada aby nie mozna bylo wykryc kolizji w kolejnej petli
+
+                    PartOfBodySnake last= SnakeBody.get(SnakeBody.size()-1);//pobieramy ogon
+                    last.checkForAdd=true;//ustawiamy wlasciwosc aby zadzialal mechanizm wstawienia kiedy wykryje
 
                 }
 
@@ -328,6 +333,38 @@ public class CustomView extends View{
                     }
                     break;
             }
+            if (checkForAdd)
+            {
+                if (isColision(Food))
+                {
+                    //Food.x=?;
+                    Food.colisionDetect=false;
+                    PartOfBodySnake n=new PartOfBodySnake(false);
+                    n.x=this.x;
+                    n.y=this.y;
+                    n.r=45;
+                    n.kierunek=kierunek;
+                   switch(kierunek)
+                   {
+                       case Prawa:
+                           n.x-=n.r+this.r;
+                           break;
+                       case Lewa:
+                           n.x+=n.r+this.r;
+                           break;
+                       case Gora:
+                           n.y+=n.r+this.r;
+                           break;
+                       case Dol:
+                           n.y-=n.r+this.r;
+                           break;
+                   }
+                   checkForAdd=false;
+                    n.parent=this;
+                   SnakeBody.add(n);
+
+                }
+            }
             //this.kierunek=parent.kierunek;
         }
 
@@ -390,7 +427,12 @@ public class CustomView extends View{
             float px_l=x-r,
                   px_p=x+r;
 
-            return p.x>px_l && p.x<px_p && p.y>py_g && p.y<py_d ;
+
+
+            boolean colision= p.x>px_l && p.x<px_p && p.y>py_g && p.y<py_d;
+
+
+            return colision;
         }
     }
 
