@@ -18,7 +18,7 @@ public class CustomView extends View{
     PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody=new ArrayList<PartOfBodySnake>();
     PartOfBodySnake Food=new PartOfBodySnake(true);
-
+    boolean isGameOver=false, isPause=false;
 
     public CustomView(Context context) {
         super(context);
@@ -37,38 +37,53 @@ public class CustomView extends View{
 
     void init()
     {
-        if(Head ==null) {
-            Food.x=500;
-            Food.y=500;
-
-            Head = new PartOfBodySnake(false);
-
-            int sh=50*2,
-                sb=45*2;
-            Head.color=Color.GREEN;
-            Head.x=sh+(sb*3);
-            this.SnakeBody.add(Head);
-
-            PartOfBodySnake b=new PartOfBodySnake(false);
-            b.r=45;
-            b.x=(sb*3);
-            b.parent=Head;
-
-            this.SnakeBody.add(b);
-
-            PartOfBodySnake b2=new PartOfBodySnake(false);
-            b2.r=45;
-            b2.x=(sb*2);
-            b2.parent=b;
-
-            this.SnakeBody.add(b2);
-
-            PartOfBodySnake b3=new PartOfBodySnake(false);
-            b3.r=45;
-            b3.x=sb;
-            b3.parent=b2;
-            this.SnakeBody.add(b3);
+        if(Head !=null) {
+            SnakeBody.clear();
+            Head.Close();
         }
+
+        Food.x=500;
+        Food.y=500;
+
+        Head = new PartOfBodySnake(false);
+
+        int sh=50*2,
+            sb=45*2;
+        Head.color=Color.GREEN;
+        Head.x=sh+(sb*3);
+        this.SnakeBody.add(Head);
+
+        PartOfBodySnake b=new PartOfBodySnake(false);
+        b.r=45;
+        b.x=(sb*3);
+        b.parent=Head;
+
+        this.SnakeBody.add(b);
+
+        PartOfBodySnake b2=new PartOfBodySnake(false);
+        b2.r=45;
+        b2.x=(sb*2);
+        b2.parent=b;
+
+        this.SnakeBody.add(b2);
+
+        PartOfBodySnake b3=new PartOfBodySnake(false);
+        b3.r=45;
+        b3.x=sb;
+        b3.parent=b2;
+        isGameOver=false;
+        this.SnakeBody.add(b3);
+
+    }
+
+    public void GameOver()
+    {
+
+    }
+
+    public void SetPause()
+    {
+        this.isPause=!this.isPause;
     }
 
     @Override
@@ -150,7 +165,13 @@ public class CustomView extends View{
     }
 
     public void Start() {
-        Head.start();
+        if(!Head.isAlive())
+            Head.start();
+        else
+        {
+            init();
+            Head.start();
+        }
     }
 
     public void Left() {
@@ -190,7 +211,7 @@ public class CustomView extends View{
 
         PartOfBodySnake parent=null;
 
-        boolean isFood=false, colisionDetect=false;
+        boolean isFood=false, colisionDetect=false, runGame=true;
         float x=50,y=75, r=50;
         int color=Color.parseColor("#0000FF");
         private EKierunek kierunek= EKierunek.Prawa;
@@ -208,72 +229,66 @@ public class CustomView extends View{
         @Override
         public void run() {
 
-            while (true)
+            while (runGame)
             {
-                if(parent==null) {
-                    switch (kierunek) {
-                        case Prawa:
-                            if (x > getWidth() - r)
-                                Down();
-                            else
-                                x += 15;
-                            break;
-                        case Lewa:
-                            if (x < r)
-                                Up();
-                            else
-                                x -= 15;
-                            break;
-                        case Gora:
-                            if (y < r)
-                                Right();
-                            else
-                                y -= 15;
-                            break;
-                        case Dol:
-                            if (y > getHeight() - r)
-                                Left();
-                            else
-                                y += 15;
-                            break;
-                    }
-                }
-
-                int i=0;
-                //ustawianie pozostalych elemenow weza
-                for (PartOfBodySnake p:SnakeBody)
-                {
-
-                    if(p.parent!=null)
-                        p.refreshPosition();
-                    if (i>1)
-                        if(isColision(p,25))
-                        {
-                            Log.d(TAG, "GAME OVER");
-                           // Toast.makeText(MainActivity.This, "test", Toast.LENGTH_SHORT);
+                if (!isGameOver && !isPause) {
+                    if (parent == null) {
+                        switch (kierunek) {
+                            case Prawa:
+                                if (x > getWidth() - r)
+                                    Down();
+                                else
+                                    x += 15;
+                                break;
+                            case Lewa:
+                                if (x < r)
+                                    Up();
+                                else
+                                    x -= 15;
+                                break;
+                            case Gora:
+                                if (y < r)
+                                    Right();
+                                else
+                                    y -= 15;
+                                break;
+                            case Dol:
+                                if (y > getHeight() - r)
+                                    Left();
+                                else
+                                    y += 15;
+                                break;
                         }
-                    i++;
+                    }
 
+                    int i = 0;
+                    //ustawianie pozostalych elemenow weza
+                    for (PartOfBodySnake p : SnakeBody) {
+                        if (p.parent != null)
+                            p.refreshPosition();
+                        if (i > 1)
+                            if (isColision(p, 25)) {
+                                GameOver();
+                                isGameOver=true;
+                            }
+                        i++;
+
+                    }
+
+                    if (isColision(Food, 0) && !Food.colisionDetect) {
+
+                        Log.d(TAG, "Kolizja");
+                        Food.colisionDetect = true;//bloakada aby nie mozna bylo wykryc kolizji w kolejnej petli
+
+                        PartOfBodySnake last = SnakeBody.get(SnakeBody.size() - 1);//pobieramy ogon
+                        last.Add();
+                        Random g = new Random();
+                        Food.x = g.nextInt(500);
+                        Food.y = g.nextInt(500);
+
+                    } else if (!isColision(Food, 0))
+                        Food.colisionDetect = false;
                 }
-
-
-
-                if(isColision(Food,0) && !Food.colisionDetect)
-                {
-
-                    Log.d(TAG, "Kolizja");
-                    Food.colisionDetect=true;//bloakada aby nie mozna bylo wykryc kolizji w kolejnej petli
-
-                    PartOfBodySnake last= SnakeBody.get(SnakeBody.size()-1);//pobieramy ogon
-                    last.Add();
-                    Random g = new Random();
-                    Food.x=g.nextInt(500);
-                    Food.y=g.nextInt(500);
-
-                }else
-                 if(!isColision(Food,0))
-                     Food.colisionDetect=false;
-
                 try {
                     Thread.sleep(sleepValue);
                 } catch (InterruptedException e) {
@@ -454,6 +469,10 @@ public class CustomView extends View{
 
 
             return colision;
+        }
+
+        public void Close() {
+            runGame=false;
         }
     }
 
