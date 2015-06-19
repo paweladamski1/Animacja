@@ -50,19 +50,5 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void LeftClick(View view) {
-        gameView.Left();
-    }
 
-    public void DownClick(View view) {
-        gameView.Down();
-    }
-
-    public void RightClick(View view) {
-        gameView.Right();
-    }
-
-    public void UpClick(View view) {
-        gameView.Up();
-    }
 }

@@ -12,7 +12,9 @@
         android:id="@+id/GameView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/DownBtn" />
+        android:layout_alignTop="@+id/StartBtn"
+        android:layout_toLeftOf="@+id/StartBtn"
+        android:layout_toStartOf="@+id/StartBtn" />
 
     <Button
         android:layout_width="wrap_content"
@@ -21,46 +23,7 @@
         android:id="@+id/StartBtn"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="50dp" />
+        android:layout_alignParentEnd="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="←"
-        android:id="@+id/LeftBtn"
-        android:layout_alignTop="@+id/StartBtn"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:onClick="LeftClick"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="↑"
-        android:id="@+id/UpBtn"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/LeftBtn"
-        android:layout_toEndOf="@+id/LeftBtn"
-        android:onClick="UpClick"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="→"
-        android:id="@+id/RightBtn"
-        android:layout_below="@+id/UpBtn"
-        android:layout_toRightOf="@+id/UpBtn"
-        android:layout_toEndOf="@+id/UpBtn"
-        android:onClick="RightClick"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="↓"
-        android:id="@+id/DownBtn"
-        android:layout_alignTop="@+id/RightBtn"
-        android:layout_toLeftOf="@+id/RightBtn"
-        android:layout_toStartOf="@+id/RightBtn"
-        android:onClick="DownClick"/>
 </RelativeLayout>

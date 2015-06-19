@@ -16,6 +16,8 @@ public class CustomView extends View{
     static String TAG="Animacja";
     PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody=new ArrayList<PartOfBodySnake>();
+    PartOfBodySnake Food=new PartOfBodySnake(true);
+
 
     public CustomView(Context context) {
         super(context);
@@ -35,7 +37,10 @@ public class CustomView extends View{
     void init()
     {
         if(Head ==null) {
-            Head = new PartOfBodySnake();
+            Food.x=500;
+            Food.y=500;
+
+            Head = new PartOfBodySnake(false);
 
             int sh=50*2,
                 sb=45*2;
@@ -43,21 +48,21 @@ public class CustomView extends View{
             Head.x=sh+(sb*3);
             this.SnakeBody.add(Head);
 
-            PartOfBodySnake b=new PartOfBodySnake();
+            PartOfBodySnake b=new PartOfBodySnake(false);
             b.r=45;
             b.x=(sb*3);
             b.parent=Head;
 
             this.SnakeBody.add(b);
 
-            PartOfBodySnake b2=new PartOfBodySnake();
+            PartOfBodySnake b2=new PartOfBodySnake(false);
             b2.r=45;
             b2.x=(sb*2);
             b2.parent=b;
 
             this.SnakeBody.add(b2);
 
-            PartOfBodySnake b3=new PartOfBodySnake();
+            PartOfBodySnake b3=new PartOfBodySnake(false);
             b3.r=45;
             b3.x=sb;
             b3.parent=b2;
@@ -65,14 +70,8 @@ public class CustomView extends View{
         }
     }
 
-    boolean AccessChengeDirection=true;
-    int AccessChengeDirectionCount=5;
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(!AccessChengeDirection)
-            return false;
-        AccessChengeDirection=false;
 
         float tx= event.getX(), ty=event.getY();
         float rx=tx- Head.x;
@@ -133,18 +132,14 @@ public class CustomView extends View{
     @Override
     protected void onDraw(Canvas c) {
 
-        for(PartOfBodySnake p:SnakeBody) {
+        //rysowanie wê¿a na ekranie
+        for(PartOfBodySnake p:SnakeBody)
             p.Paint(c);
-        }
+
+        //rysowanie pokarmu
+        Food.Paint(c);
+
         invalidate();
-        if (!AccessChengeDirection)
-        {
-            AccessChengeDirectionCount--;
-            if (AccessChengeDirectionCount<0) {
-                AccessChengeDirection = true;
-                AccessChengeDirectionCount=5;
-            }
-        }
     }
 
     public void Start() {
@@ -187,6 +182,7 @@ public class CustomView extends View{
     public class PartOfBodySnake extends Thread {
 
         PartOfBodySnake parent=null;
+        boolean isFood=false;
         float x=50,y=75, r=50;
         int color=Color.parseColor("#0000FF");
         private EKierunek kierunek= EKierunek.Prawa;
@@ -197,7 +193,8 @@ public class CustomView extends View{
         int sleepValue = 20;
 
         //constructor
-        public PartOfBodySnake() {
+        public PartOfBodySnake(boolean isFood) {
+            this.isFood=isFood;
         }
 
         @Override
@@ -239,6 +236,14 @@ public class CustomView extends View{
                 {
                     if(p.parent!=null)
                         p.refreshPosition();
+                }
+
+                if(isColision(Food))
+                {
+                    /*Food.x=50;
+                    Food.y=600;*/
+                    Log.d(TAG, "Kolizja");
+
                 }
 
                 try {
@@ -332,16 +337,24 @@ public class CustomView extends View{
 
         public void Paint(Canvas c)
         {
-            Paint paint = new Paint();
-            paint.setColor(color);
-            paint.setAntiAlias(true);
-            c.drawCircle(x, y, r, paint);
+            if(isFood)
+            {
+                Paint paint = new Paint();
+                paint.setColor(Color.GREEN);
+                paint.setAntiAlias(true);
+                c.drawCircle(x, y, 15, paint);
+            }else {
+                Paint paint = new Paint();
+                paint.setColor(color);
+                paint.setAntiAlias(true);
+                c.drawCircle(x, y, r, paint);
+            }
         }
 
         public void Left() {
             if(kierunek!=EKierunek.Prawa) {
                 kierunek = EKierunek.Lewa;
-                Log.d(TAG, "LEWA" );
+                Log.d(TAG, "LEWA");
             }
         }
 
@@ -364,6 +377,20 @@ public class CustomView extends View{
                 kierunek = EKierunek.Gora;
                 Log.d(TAG, "GORA" );
             }
+        }
+
+        public boolean isColision(PartOfBodySnake p)
+        {
+            if(p==null)
+                return false;
+
+            float py_g=y-r,
+                  py_d=y+r;
+
+            float px_l=x-r,
+                  px_p=x+r;
+
+            return p.x>px_l && p.x<px_p && p.y>py_g && p.y<py_d ;
         }
     }
 
