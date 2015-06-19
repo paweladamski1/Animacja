@@ -23,18 +23,22 @@
         android:id="@+id/StartBtn"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:textSize="45dp" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="P"
+        android:text="Pause"
         android:id="@+id/PauseBtn"
         android:layout_below="@+id/StartBtn"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_marginTop="33dp"
-        android:onClick="PauseClick"/>
+        android:onClick="PauseClick"
+        android:textSize="40dp"
+        android:layout_alignLeft="@+id/StartBtn"
+        android:layout_alignStart="@+id/StartBtn" />
 
 
 </RelativeLayout>

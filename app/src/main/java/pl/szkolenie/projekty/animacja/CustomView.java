@@ -45,6 +45,7 @@ public class CustomView extends View{
 
         Food.x=500;
         Food.y=500;
+        Food.r=5;
 
         Head = new PartOfBodySnake(false);
         this.SnakeBody.add(Head);
@@ -77,39 +78,36 @@ public class CustomView extends View{
         switch(Head.kierunek)
         {
             case Prawa: {
-                //if(!(rx<0 && ry>-50 && ry<50 ))
-                if (ry > 50)
+                if (ry > Head.r)
                     Down();
                 else
-                    if (ry < -50)
+                    if (ry < -Head.r)
                         Up();
 
                 break;
             }
             case Lewa:
                 {
-                    // if(!(rx>0 && ry>-50 && ry<50 ))
-                    if (ry > 50)
+                    if (ry > Head.r)
                         Down();
-                    else if (ry < -50)
+                    else if (ry < -Head.r)
                         Up();
 
                     break;
                 }
             case Gora:
-                //if(!(ry>0 && rx>-50 && rx<50 ))
                 {
-                    if (rx > 50)
+                    if (rx > Head.r)
                         Right();
-                    else if (rx < -50)
+                    else if (rx < -Head.r)
                         Left();
                     break;
                 }
             case Dol: {
-                //if(!(ry<0 && rx>-50 && rx<50 ))
-                if (rx > 50)
+
+                if (rx > Head.r)
                     Right();
-                else if (rx < -50)
+                else if (rx < -Head.r)
                     Left();
 
                 break;
@@ -125,6 +123,7 @@ public class CustomView extends View{
         //Log.d("Animacja", Head.kierunek+" rx="+rx+"; ry="+ry);
     }
 
+    //int red, green, blue;
 
     @Override
     protected void onDraw(Canvas c) {
@@ -141,8 +140,9 @@ public class CustomView extends View{
 
         }
         if(isGameOver) {
+            Random rand=new Random();
             Paint p = new Paint();
-            p.setColor(Color.RED);
+            p.setColor(Color.rgb(rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)));
             p.setTextSize(60);
             p.setTextAlign(Paint.Align.CENTER);
             c.drawText("Game Over\n zdobyłeś(aś) "+ptk+" punktów", 750, 650, p);
@@ -157,7 +157,7 @@ public class CustomView extends View{
         {
             Paint p = new Paint();
             p.setColor(Color.BLACK);
-            p.setTextSize(55);
+            p.setTextSize(30);
             p.setTextAlign(Paint.Align.LEFT);
             c.drawText("Punkty: "+ptk, 60, 50, p);
         }
@@ -215,7 +215,7 @@ public class CustomView extends View{
         PartOfBodySnake parent=null;
 
         boolean isFood=false, colisionDetect=false, runGame=true;
-        float x=50,y=75, r=50;
+        float x=50,y=75, r=15, v=r/3;
         int color=Color.parseColor("#0000FF");
         private EKierunek kierunek= EKierunek.Prawa;
         boolean isParent=false;
@@ -241,25 +241,25 @@ public class CustomView extends View{
                                 if (x > getWidth() - r)
                                     Down();
                                 else
-                                    x += 15;
+                                    x += v;
                                 break;
                             case Lewa:
                                 if (x < r)
                                     Up();
                                 else
-                                    x -= 15;
+                                    x -= v;
                                 break;
                             case Gora:
                                 if (y < r)
                                     Right();
                                 else
-                                    y -= 15;
+                                    y -= v;
                                 break;
                             case Dol:
                                 if (y > getHeight() - r)
                                     Left();
                                 else
-                                    y += 15;
+                                    y += v;
                                 break;
                         }
                     }
@@ -270,7 +270,7 @@ public class CustomView extends View{
                         if (p.parent != null)
                             p.refreshPosition();
                         if (i > 1)
-                            if (isColision(p, 25)) {
+                            if (isColision(p, v)) {
                                 GameOver();
                                 isGameOver=true;
                             }
@@ -307,7 +307,7 @@ public class CustomView extends View{
             PartOfBodySnake n=new PartOfBodySnake(false);
             n.x=this.x;
             n.y=this.y;
-            n.r=45;
+            n.r=10;
             n.kierunek=kierunek;
             switch(kierunek)
             {
@@ -337,7 +337,7 @@ public class CustomView extends View{
 
             switch (kierunek) {
                 case Prawa:
-                    x += 15;
+                    x += v;
                     if(parent.kierunek!=kierunek)
                     {
                         if(x>=parent.x ) {
@@ -354,7 +354,7 @@ public class CustomView extends View{
                     }
                     break;
                 case Lewa:
-                    x -= 15;
+                    x -= v;
                     if(parent.kierunek!=kierunek)
                     {
                         if(x<=parent.x )
@@ -371,7 +371,7 @@ public class CustomView extends View{
                     }
                     break;
                 case Gora:
-                    y -= 15;
+                    y -= v;
                     if(parent.kierunek!=kierunek)
                     {
                         if(y<=parent.y ) {
@@ -387,7 +387,7 @@ public class CustomView extends View{
                     }
                     break;
                 case Dol:
-                    y += 15;
+                    y += v;
                     if(parent.kierunek!=kierunek)
                     {
                         if(y>=parent.y ) {
@@ -417,7 +417,7 @@ public class CustomView extends View{
                 Paint paint = new Paint();
                 paint.setColor(Color.GREEN);
                 paint.setAntiAlias(true);
-                c.drawCircle(x, y, 15, paint);
+                c.drawCircle(x, y, v, paint);
             }else {
                 Paint paint = new Paint();
                 paint.setColor(color);
@@ -454,7 +454,7 @@ public class CustomView extends View{
             }
         }
 
-        public boolean isColision(PartOfBodySnake p, int tolerancja)
+        public boolean isColision(PartOfBodySnake p, float tolerancja)
         {
             if(p==null)
                 return false;
