@@ -133,7 +133,7 @@ public class CustomView extends View{
     @Override
     protected void onDraw(Canvas c) {
 
-        //rysowanie w�a na ekranie
+        //rysowanie węża na ekranie
         try {
             for (PartOfBodySnake p : SnakeBody)
                 p.Paint(c);
@@ -239,14 +239,26 @@ public class CustomView extends View{
                     }
                 }
 
+                int i=0;
                 //ustawianie pozostalych elemenow weza
                 for (PartOfBodySnake p:SnakeBody)
                 {
+
                     if(p.parent!=null)
                         p.refreshPosition();
+                    if (i>1)
+                        if(isColision(p,25))
+                        {
+                            Log.d(TAG, "GAME OVER");
+                           // Toast.makeText(MainActivity.This, "test", Toast.LENGTH_SHORT);
+                        }
+                    i++;
+
                 }
 
-                if(isColision(Food) && !Food.colisionDetect)
+
+
+                if(isColision(Food,0) && !Food.colisionDetect)
                 {
 
                     Log.d(TAG, "Kolizja");
@@ -259,7 +271,7 @@ public class CustomView extends View{
                     Food.y=g.nextInt(500);
 
                 }else
-                 if(!isColision(Food))
+                 if(!isColision(Food,0))
                      Food.colisionDetect=false;
 
                 try {
@@ -422,16 +434,19 @@ public class CustomView extends View{
             }
         }
 
-        public boolean isColision(PartOfBodySnake p)
+        public boolean isColision(PartOfBodySnake p, int tolerancja)
         {
             if(p==null)
                 return false;
 
-            float py_g=y-r,
-                  py_d=y+r;
+            if (this==p)
+                return false;
 
-            float px_l=x-r,
-                  px_p=x+r;
+            float py_g=y-(r-tolerancja),
+                  py_d=y+(r-tolerancja);
+
+            float px_l=x-(r-tolerancja),
+                  px_p=x+(r-tolerancja);
 
 
 
