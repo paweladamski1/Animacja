@@ -19,6 +19,7 @@ public class CustomView extends View{
     ArrayList<PartOfBodySnake> SnakeBody=new ArrayList<PartOfBodySnake>();
     PartOfBodySnake Food=new PartOfBodySnake(true);
     boolean isGameOver=false, isPause=false;
+    int ptk=0;
 
     public CustomView(Context context) {
         super(context);
@@ -46,33 +47,13 @@ public class CustomView extends View{
         Food.y=500;
 
         Head = new PartOfBodySnake(false);
-
-        int sh=50*2,
-            sb=45*2;
-        Head.color=Color.GREEN;
-        Head.x=sh+(sb*3);
         this.SnakeBody.add(Head);
+        Head.color=Color.GREEN;
+        Head.x=200;
+        Head.Add().Add().Add().Add().Add().Add().Add().Add().Add().Add();
 
-        PartOfBodySnake b=new PartOfBodySnake(false);
-        b.r=45;
-        b.x=(sb*3);
-        b.parent=Head;
-
-        this.SnakeBody.add(b);
-
-        PartOfBodySnake b2=new PartOfBodySnake(false);
-        b2.r=45;
-        b2.x=(sb*2);
-        b2.parent=b;
-
-        this.SnakeBody.add(b2);
-
-        PartOfBodySnake b3=new PartOfBodySnake(false);
-        b3.r=45;
-        b3.x=sb;
-        b3.parent=b2;
         isGameOver=false;
-        this.SnakeBody.add(b3);
+        ptk=0;
 
     }
 
@@ -148,6 +129,8 @@ public class CustomView extends View{
     @Override
     protected void onDraw(Canvas c) {
 
+        //rysowanie pokarmu
+        Food.Paint(c);
         //rysowanie węża na ekranie
         try {
             for (PartOfBodySnake p : SnakeBody)
@@ -157,9 +140,29 @@ public class CustomView extends View{
         {
 
         }
+        if(isGameOver) {
+            Paint p = new Paint();
+            p.setColor(Color.RED);
+            p.setTextSize(60);
+            p.setTextAlign(Paint.Align.CENTER);
+            c.drawText("Game Over\n zdobyłeś(aś) "+ptk+" punktów", 750, 650, p);
+        }else
+        if(isPause) {
+            Paint p = new Paint();
+            p.setColor(Color.GRAY);
+            p.setTextSize(60);
+            p.setTextAlign(Paint.Align.CENTER);
+            c.drawText("Pause", 750, 650, p);
+        }else
+        {
+            Paint p = new Paint();
+            p.setColor(Color.BLACK);
+            p.setTextSize(55);
+            p.setTextAlign(Paint.Align.LEFT);
+            c.drawText("Punkty: "+ptk, 60, 50, p);
+        }
 
-        //rysowanie pokarmu
-        Food.Paint(c);
+
 
         invalidate();
     }
@@ -285,6 +288,8 @@ public class CustomView extends View{
                         Random g = new Random();
                         Food.x = g.nextInt(500);
                         Food.y = g.nextInt(500);
+                        Random r=new Random();
+                        ptk+=r.nextInt(25);
 
                     } else if (!isColision(Food, 0))
                         Food.colisionDetect = false;
@@ -297,9 +302,8 @@ public class CustomView extends View{
             }
         }
 
-        private void Add() {
-            //Food.x=?;
-            //Food.colisionDetect=false;
+        public PartOfBodySnake Add() {
+
             PartOfBodySnake n=new PartOfBodySnake(false);
             n.x=this.x;
             n.y=this.y;
@@ -322,6 +326,7 @@ public class CustomView extends View{
             }
             n.parent=this;
             SnakeBody.add(n);
+            return n;
         }
 
         public void refreshPosition()
