@@ -62,14 +62,17 @@ public class CustomView extends View{
             b3.x=sb;
             b3.parent=b2;
             this.SnakeBody.add(b3);
-
-            //
         }
-
     }
+
+    boolean AccessChengeDirection=true;
+    int AccessChengeDirectionCount=5;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if(!AccessChengeDirection)
+            return false;
+        AccessChengeDirection=false;
 
         float tx= event.getX(), ty=event.getY();
         float rx=tx- Head.x;
@@ -77,51 +80,48 @@ public class CustomView extends View{
         LOG_Kulka(rx, ry);
         switch(Head.kierunek)
         {
-            case Prawa:
-                if(rx<0 && ry>-50 && ry<50 )
-                    Head.kierunek=EKierunek.Lewa;
+            case Prawa: {
+                //if(!(rx<0 && ry>-50 && ry<50 ))
+                if (ry > 50)
+                    Head.kierunek = EKierunek.Dol;
                 else
-                    if(ry>50)
-                        Head.kierunek=EKierunek.Dol;
-                    else
-                        if(ry<-50)
-                            Head.kierunek=EKierunek.Gora;
+                    if (ry < -50)
+                        Head.kierunek = EKierunek.Gora;
 
                 break;
+            }
             case Lewa:
-                if(rx>0 && ry>-50 && ry<50 )
-                    Head.kierunek=EKierunek.Prawa;
-                else
-                    if(ry>50)
-                        Head.kierunek=EKierunek.Dol;
-                    else
-                        if(ry<-50)
-                            Head.kierunek=EKierunek.Gora;
+                {
+                    // if(!(rx>0 && ry>-50 && ry<50 ))
+                    if (ry > 50)
+                        Head.kierunek = EKierunek.Dol;
+                    else if (ry < -50)
+                        Head.kierunek = EKierunek.Gora;
+
+                    break;
+                }
+            case Gora:
+                //if(!(ry>0 && rx>-50 && rx<50 ))
+                {
+                    if (rx > 50)
+                        Head.kierunek = EKierunek.Prawa;
+                    else if (rx < -50)
+                        Head.kierunek = EKierunek.Lewa;
+                    break;
+                }
+            case Dol: {
+                //if(!(ry<0 && rx>-50 && rx<50 ))
+                if (rx > 50)
+                    Head.kierunek = EKierunek.Prawa;
+                else if (rx < -50)
+                    Head.kierunek = EKierunek.Lewa;
 
                 break;
-            case Gora:
-                if(ry>0 && rx>-50 && rx<50 )
-                    Head.kierunek=EKierunek.Dol;
-                else
-                    if(rx>50)
-                        Head.kierunek=EKierunek.Prawa;
-                    else
-                        if(rx<-50)
-                            Head.kierunek=EKierunek.Lewa;
-                break;
-            case Dol:
-                if(ry<0 && rx>-50 && rx<50 )
-                    Head.kierunek=EKierunek.Gora;
-                else
-                    if(rx>50)
-                        Head.kierunek=EKierunek.Prawa;
-                    else
-                        if(rx<-50)
-                            Head.kierunek=EKierunek.Lewa;
-                break;
+            }
         }
 
-        return super.onTouchEvent(event);
+        //return super.onTouchEvent(event);
+        return true;
     }
 
     private void LOG_Kulka(float rx, float ry)
@@ -137,6 +137,14 @@ public class CustomView extends View{
             p.Paint(c);
         }
         invalidate();
+        if (!AccessChengeDirection)
+        {
+            AccessChengeDirectionCount--;
+            if (AccessChengeDirectionCount<0) {
+                AccessChengeDirection = true;
+                AccessChengeDirectionCount=5;
+            }
+        }
     }
 
     public void Start() {
@@ -195,6 +203,7 @@ public class CustomView extends View{
                     }
                 }
 
+                //ustawianie pozostalych elemenow weza
                 for (PartOfBodySnake p:SnakeBody)
                 {
                     if(p.parent!=null)
