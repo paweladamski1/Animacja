@@ -14,6 +14,7 @@ public class MainActivity extends ActionBarActivity {
     CustomView gameView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        This=this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button StartBtn=(Button)findViewById(R.id.StartBtn);
@@ -25,7 +26,7 @@ public class MainActivity extends ActionBarActivity {
                 gameView.Start();
             }
         });
-        This=this;
+
     }
 
     @Override

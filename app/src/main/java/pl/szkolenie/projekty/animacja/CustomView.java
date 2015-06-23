@@ -1,7 +1,8 @@
 package pl.szkolenie.projekty.animacja;
 
-
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +15,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class CustomView extends View{
+    static Bitmap  g_d_bmp, c_pion_bmp, c_poziom_bmp, c_skret_dl_bmp, c_skret_dp_bmp, c_skret_lg,
+            c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp;
+
     static String TAG="Animacja";
     PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody=new ArrayList<PartOfBodySnake>();
@@ -38,6 +42,23 @@ public class CustomView extends View{
 
     void init()
     {
+        if(c_pion_bmp==null)
+        {
+            c_pion_bmp = LoadBitmap( R.drawable.c_pion);
+            c_poziom_bmp = LoadBitmap( R.drawable.c_poziom);
+            c_skret_dl_bmp = LoadBitmap( R.drawable.c_skret_dl);
+            c_skret_dp_bmp = LoadBitmap( R.drawable.c_skret_dp);
+            c_skret_lg = LoadBitmap( R.drawable.c_skret_lg);
+            c_skret_pg_bmp = LoadBitmap( R.drawable.c_skret_pg);
+            g_d_bmp = LoadBitmap( R.drawable.g_d);
+            g_g_bmp = LoadBitmap( R.drawable.g_g);
+            g_l_bmp = LoadBitmap( R.drawable.g_l);
+            g_p_bmp= LoadBitmap( R.drawable.g_p);
+            o_d_bmp= LoadBitmap( R.drawable.o_d);
+            o_g_bmp= LoadBitmap( R.drawable.o_g);
+            o_l_bmp= LoadBitmap( R.drawable.o_l);
+            o_p_bmp= LoadBitmap( R.drawable.o_p);
+        }
         if(Head !=null) {
             SnakeBody.clear();
             Head.Close();
@@ -56,11 +77,23 @@ public class CustomView extends View{
         isGameOver=false;
         ptk=0;
 
+
+    }
+
+    Bitmap LoadBitmap(int resource)
+    {
+        try {
+            return BitmapFactory.decodeResource(MainActivity.This.getResources(), resource);
+        }
+        catch(Exception ex)
+        {
+            return null;
+        }
     }
 
     public void GameOver()
     {
-
+        isGameOver=true;
     }
 
     public void SetPause()
@@ -130,6 +163,8 @@ public class CustomView extends View{
 
         //rysowanie pokarmu
         Food.Paint(c);
+
+        //itmap(bitmap,  );
         //rysowanie węża na ekranie
         try {
             for (PartOfBodySnake p : SnakeBody)
@@ -145,25 +180,22 @@ public class CustomView extends View{
             p.setColor(Color.rgb(rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)));
             p.setTextSize(60);
             p.setTextAlign(Paint.Align.CENTER);
-            c.drawText("Game Over\n zdobyłeś(aś) "+ptk+" punktów", 750, 650, p);
+            c.drawText("Game Over\n zdobyłeś(aś) "+ptk+" punktów", getWidth()/2, getHeight()/2, p);
         }else
         if(isPause) {
             Paint p = new Paint();
             p.setColor(Color.GRAY);
             p.setTextSize(60);
             p.setTextAlign(Paint.Align.CENTER);
-            c.drawText("Pause", 750, 650, p);
+            c.drawText("Pause", getWidth()/2, getHeight()/2, p);
         }else
         {
             Paint p = new Paint();
             p.setColor(Color.BLACK);
             p.setTextSize(30);
             p.setTextAlign(Paint.Align.LEFT);
-            c.drawText("Punkty: "+ptk, 60, 50, p);
+            c.drawText("Punkty: "+ptk, 25, 50, p);
         }
-
-
-
         invalidate();
     }
 
@@ -239,25 +271,25 @@ public class CustomView extends View{
                         switch (kierunek) {
                             case Prawa:
                                 if (x > getWidth() - r)
-                                    Down();
+                                    GameOver();
                                 else
                                     x += v;
                                 break;
                             case Lewa:
                                 if (x < r)
-                                    Up();
+                                    GameOver();
                                 else
                                     x -= v;
                                 break;
                             case Gora:
                                 if (y < r)
-                                    Right();
+                                    GameOver();
                                 else
                                     y -= v;
                                 break;
                             case Dol:
                                 if (y > getHeight() - r)
-                                    Left();
+                                    GameOver();
                                 else
                                     y += v;
                                 break;
@@ -272,7 +304,7 @@ public class CustomView extends View{
                         if (i > 1)
                             if (isColision(p, v)) {
                                 GameOver();
-                                isGameOver=true;
+
                             }
                         i++;
 
@@ -422,7 +454,11 @@ public class CustomView extends View{
                 Paint paint = new Paint();
                 paint.setColor(color);
                 paint.setAntiAlias(true);
-                c.drawCircle(x, y, r, paint);
+               // c.drawCircle(x, y, r, paint);
+               // Rect scr=new Rect(0,0,0,0 );
+              //  RectF dsc=new RectF(x,y, 0, 0);
+
+                c.drawBitmap(g_p_bmp, x+50, y+50, null);
             }
         }
 
