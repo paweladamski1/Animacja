@@ -78,8 +78,6 @@ public class CustomView extends View{
 
         isGameOver=false;
         ptk=0;
-
-
     }
 
     Bitmap LoadBitmap(int resource)
@@ -210,7 +208,7 @@ public class CustomView extends View{
         PartOfBodySnake b1=SnakeBody.get(1);
         float ry=Math.max(b1.y,Head.y)-Math.min(b1.y,Head.y);
 
-        if (ry>=50)
+        if (ry>=Head.height)
             Head.Left();
     }
 
@@ -218,7 +216,7 @@ public class CustomView extends View{
         PartOfBodySnake b1=SnakeBody.get(1);
         float rx=Math.max(b1.x,Head.x)-Math.min(b1.x,Head.x);
 
-        if (rx>=50)
+        if (rx>=Head.width)
             Head.Down();
     }
 
@@ -226,7 +224,7 @@ public class CustomView extends View{
         PartOfBodySnake b1=SnakeBody.get(1);
         float ry=Math.max(b1.y,Head.y)-Math.min(b1.y,Head.y);
 
-        if (ry>=50)
+        if (ry>= Head.height)
             Head.Right();
     }
 
@@ -234,7 +232,7 @@ public class CustomView extends View{
         PartOfBodySnake b1=SnakeBody.get(1);
         float rx=Math.max(b1.x,Head.x)-Math.min(b1.x,Head.x);
 
-        if (rx>=50)
+        if (rx>=Head.width)
             Head.Up();
     }
 
@@ -245,7 +243,7 @@ public class CustomView extends View{
         PartOfBodySnake child=null;
 
         boolean isFood=false, colisionDetect=false, runGame=true;
-        float x=50,y=75, width=55, height=55, v=5;
+        float x=50,y=75, width=42, height=42, v=5;
 
         int color=Color.parseColor("#0000FF");
         private EKierunek kierunek= EKierunek.Prawa;
@@ -457,33 +455,53 @@ public class CustomView extends View{
             {
                 PaintHead(c);
             }else
-                if(isBody())
+                if(isTail())
                 {
-                    PaintBody(c);
-                }else
-                    if(isTail())
-                    {
 
+                }else
+                    if(isBody())
+                    {
+                        PaintBody(c);
                     }
+
         }
 
         private void PaintBody(Canvas c) {
             Paint paint = new Paint();
             paint.setColor(color);
             paint.setAntiAlias(true);
-
-            switch(kierunek)
+            if(parent.kierunek != child.kierunek)
             {
-                case Prawa:
-                case Lewa:
-                    c.drawBitmap(c_poziom_bmp, x, y, null);
-                    break;
+                if((parent.kierunek== EKierunek.Dol && child.kierunek==EKierunek.Prawa)||
+                        (child.kierunek== EKierunek.Dol && parent.kierunek==EKierunek.Prawa)    )
+                  c.drawBitmap(c_skret_dl_bmp, x, y, paint);
+                else
+                     if((parent.kierunek== EKierunek.Lewa && child.kierunek==EKierunek.Dol) ||
+                             (child.kierunek== EKierunek.Lewa && parent.kierunek==EKierunek.Dol))
+                         c.drawBitmap(c_skret_lg, x, y, paint);
+                     else
+                         if((parent.kierunek== EKierunek.Gora && child.kierunek==EKierunek.Lewa) ||
+                                 (child.kierunek== EKierunek.Gora && parent.kierunek==EKierunek.Lewa) )
+                             c.drawBitmap(c_skret_pg_bmp, x, y, paint);
+                            else
+                             c.drawBitmap(c_skret_dp_bmp, x, y, paint);
 
-                case Gora:
-                case Dol:
-                    c.drawBitmap(c_pion_bmp, x, y, null);
-                    break;
-            }
+
+
+
+            }else
+                switch(kierunek)
+                {
+                    case Prawa:
+                    case Lewa:
+                        c.drawBitmap(c_poziom_bmp, x, y, paint);
+                        break;
+
+                    case Gora:
+                    case Dol:
+                        c.drawBitmap(c_pion_bmp, x, y, paint);
+                        break;
+                }
         }
 
         private void PaintHead(Canvas c) {
