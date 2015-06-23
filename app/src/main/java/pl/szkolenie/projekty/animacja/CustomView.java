@@ -21,7 +21,7 @@ public class CustomView extends View{
     static String TAG="Animacja";
     PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody=new ArrayList<PartOfBodySnake>();
-    PartOfBodySnake Food=new PartOfBodySnake(true);
+    PartOfBodySnake Food=new PartOfBodySnake(true, null);
     boolean isGameOver=false, isPause=false;
     int ptk=0;
 
@@ -59,6 +59,7 @@ public class CustomView extends View{
             o_l_bmp= LoadBitmap( R.drawable.o_l);
             o_p_bmp= LoadBitmap( R.drawable.o_p);
         }
+
         if(Head !=null) {
             SnakeBody.clear();
             Head.Close();
@@ -66,9 +67,10 @@ public class CustomView extends View{
 
         Food.x=500;
         Food.y=500;
-        Food.r=5;
+        Food.width=5;
+        Food.height=5;
 
-        Head = new PartOfBodySnake(false);
+        Head = new PartOfBodySnake(false, null);
         this.SnakeBody.add(Head);
         Head.color=Color.GREEN;
         Head.x=200;
@@ -111,36 +113,36 @@ public class CustomView extends View{
         switch(Head.kierunek)
         {
             case Prawa: {
-                if (ry > Head.r)
+                if (ry > Head.height)
                     Down();
                 else
-                    if (ry < -Head.r)
+                    if (ry < -Head.height)
                         Up();
 
                 break;
             }
             case Lewa:
                 {
-                    if (ry > Head.r)
+                    if (ry > Head.height)
                         Down();
-                    else if (ry < -Head.r)
+                    else if (ry < -Head.height)
                         Up();
 
                     break;
                 }
             case Gora:
                 {
-                    if (rx > Head.r)
+                    if (rx > Head.width)
                         Right();
-                    else if (rx < -Head.r)
+                    else if (rx < -Head.width)
                         Left();
                     break;
                 }
             case Dol: {
 
-                if (rx > Head.r)
+                if (rx > Head.width)
                     Right();
-                else if (rx < -Head.r)
+                else if (rx < -Head.width)
                     Left();
 
                 break;
@@ -164,16 +166,11 @@ public class CustomView extends View{
         //rysowanie pokarmu
         Food.Paint(c);
 
-        //itmap(bitmap,  );
-        //rysowanie węża na ekranie
-        try {
-            for (PartOfBodySnake p : SnakeBody)
-                p.Paint(c);
-        }
-        catch(Exception ex)
-        {
+        //rysowanie weza
+        for (PartOfBodySnake p : SnakeBody)
+            p.Paint(c);
 
-        }
+
         if(isGameOver) {
             Random rand=new Random();
             Paint p = new Paint();
@@ -213,7 +210,7 @@ public class CustomView extends View{
         PartOfBodySnake b1=SnakeBody.get(1);
         float ry=Math.max(b1.y,Head.y)-Math.min(b1.y,Head.y);
 
-        if (ry>=Head.r+b1.r)
+        if (ry>=50)
             Head.Left();
     }
 
@@ -221,7 +218,7 @@ public class CustomView extends View{
         PartOfBodySnake b1=SnakeBody.get(1);
         float rx=Math.max(b1.x,Head.x)-Math.min(b1.x,Head.x);
 
-        if (rx>=Head.r+b1.r)
+        if (rx>=50)
             Head.Down();
     }
 
@@ -229,7 +226,7 @@ public class CustomView extends View{
         PartOfBodySnake b1=SnakeBody.get(1);
         float ry=Math.max(b1.y,Head.y)-Math.min(b1.y,Head.y);
 
-        if (ry>=Head.r+b1.r)
+        if (ry>=50)
             Head.Right();
     }
 
@@ -237,7 +234,7 @@ public class CustomView extends View{
         PartOfBodySnake b1=SnakeBody.get(1);
         float rx=Math.max(b1.x,Head.x)-Math.min(b1.x,Head.x);
 
-        if (rx>=Head.r+b1.r)
+        if (rx>=50)
             Head.Up();
     }
 
@@ -245,9 +242,11 @@ public class CustomView extends View{
     public class PartOfBodySnake extends Thread {
 
         PartOfBodySnake parent=null;
+        PartOfBodySnake child=null;
 
         boolean isFood=false, colisionDetect=false, runGame=true;
-        float x=50,y=75, r=15, v=r/3;
+        float x=50,y=75, width=55, height=55, v=5;
+
         int color=Color.parseColor("#0000FF");
         private EKierunek kierunek= EKierunek.Prawa;
         boolean isParent=false;
@@ -255,10 +254,13 @@ public class CustomView extends View{
         public boolean activ = true;
         public boolean Enabled = true;
         int sleepValue = 20;
+        private float widthByKierunek;
 
         //constructor
-        public PartOfBodySnake(boolean isFood) {
+        public PartOfBodySnake(boolean isFood, PartOfBodySnake parent) {
             this.isFood=isFood;
+            if(parent!=null)
+                parent.child=this;
         }
 
         @Override
@@ -270,25 +272,25 @@ public class CustomView extends View{
                     if (parent == null) {
                         switch (kierunek) {
                             case Prawa:
-                                if (x > getWidth() - r)
+                                if (x > getWidth() - width)
                                     GameOver();
                                 else
                                     x += v;
                                 break;
                             case Lewa:
-                                if (x < r)
+                                if (x < width)
                                     GameOver();
                                 else
                                     x -= v;
                                 break;
                             case Gora:
-                                if (y < r)
+                                if (y < height)
                                     GameOver();
                                 else
                                     y -= v;
                                 break;
                             case Dol:
-                                if (y > getHeight() - r)
+                                if (y > getHeight() - height)
                                     GameOver();
                                 else
                                     y += v;
@@ -336,27 +338,27 @@ public class CustomView extends View{
 
         public PartOfBodySnake Add() {
 
-            PartOfBodySnake n=new PartOfBodySnake(false);
+            PartOfBodySnake n=new PartOfBodySnake(false, this);
             n.x=this.x;
             n.y=this.y;
-            n.r=10;
             n.kierunek=kierunek;
             switch(kierunek)
             {
                 case Prawa:
-                    n.x-=n.r+this.r;
+                    n.x-=this.width;
                     break;
                 case Lewa:
-                    n.x+=n.r+this.r;
+                    n.x+=this.width;
                     break;
                 case Gora:
-                    n.y+=n.r+this.r;
+                    n.y+=this.height;
                     break;
                 case Dol:
-                    n.y-=n.r+this.r;
+                    n.y-=this.height;
                     break;
             }
             n.parent=this;
+
             SnakeBody.add(n);
             return n;
         }
@@ -377,10 +379,10 @@ public class CustomView extends View{
                             x=parent.x;
                             if(parent.kierunek==EKierunek.Gora)
                             {
-                                y=parent.y+(parent.r+r);
+                                y=parent.y+(parent.height);
                             }else
                                 if(parent.kierunek==EKierunek.Dol) {
-                                    y = parent.y - (parent.r + r);
+                                    y = parent.y - (parent.height);
                                 }
                         }
                     }
@@ -395,10 +397,10 @@ public class CustomView extends View{
                             x=parent.x;
                             if(parent.kierunek==EKierunek.Gora)
                             {
-                                y=parent.y+(parent.r+r);
+                                y=parent.y+(parent.height);
                             }else
                                 if(parent.kierunek==EKierunek.Dol)
-                                    y=parent.y-(parent.r+r);
+                                    y=parent.y-(parent.height);
                         }
                     }
                     break;
@@ -411,10 +413,10 @@ public class CustomView extends View{
                             y=parent.y;
                             if(parent.kierunek==EKierunek.Lewa)
                             {
-                                x=parent.x+(parent.r+r);
+                                x=parent.x+(parent.width);
                             }else
                             if(parent.kierunek==EKierunek.Prawa)
-                                x=parent.x-(parent.r+r);
+                                x=parent.x-(parent.width);
                         }
                     }
                     break;
@@ -427,10 +429,10 @@ public class CustomView extends View{
                             y=parent.y;
                             if(parent.kierunek==EKierunek.Lewa)
                             {
-                                x=parent.x+(parent.r+r);
+                                x=parent.x+(parent.width);
                             }else
                                 if(parent.kierunek==EKierunek.Prawa)
-                                    x=parent.x-(parent.r+r);
+                                    x=parent.x-(parent.width);
                         }
                     }
                     break;
@@ -450,16 +452,60 @@ public class CustomView extends View{
                 paint.setColor(Color.GREEN);
                 paint.setAntiAlias(true);
                 c.drawCircle(x, y, v, paint);
-            }else {
-                Paint paint = new Paint();
-                paint.setColor(color);
-                paint.setAntiAlias(true);
-               // c.drawCircle(x, y, r, paint);
-               // Rect scr=new Rect(0,0,0,0 );
-              //  RectF dsc=new RectF(x,y, 0, 0);
+            }else
+            if(isHead())
+            {
+                PaintHead(c);
+            }else
+                if(isBody())
+                {
+                    PaintBody(c);
+                }else
+                    if(isTail())
+                    {
 
-                c.drawBitmap(g_p_bmp, x+50, y+50, null);
+                    }
+        }
+
+        private void PaintBody(Canvas c) {
+            Paint paint = new Paint();
+            paint.setColor(color);
+            paint.setAntiAlias(true);
+
+            switch(kierunek)
+            {
+                case Prawa:
+                case Lewa:
+                    c.drawBitmap(c_poziom_bmp, x, y, null);
+                    break;
+
+                case Gora:
+                case Dol:
+                    c.drawBitmap(c_pion_bmp, x, y, null);
+                    break;
             }
+        }
+
+        private void PaintHead(Canvas c) {
+            Paint paint = new Paint();
+            paint.setColor(color);
+            paint.setAntiAlias(true);
+            switch(kierunek)
+            {
+                case Prawa:
+                    c.drawBitmap(g_p_bmp, x, y, null);
+                    break;
+                case Lewa:
+                    c.drawBitmap(g_l_bmp, x, y, null);
+                    break;
+                case Gora:
+                    c.drawBitmap(g_g_bmp, x, y, null);
+                    break;
+                case Dol:
+                    c.drawBitmap(g_d_bmp, x, y, null);
+                    break;
+            }
+
         }
 
         public void Left() {
@@ -498,11 +544,11 @@ public class CustomView extends View{
             if (this==p)
                 return false;
 
-            float py_g=y-(r-tolerancja),
-                  py_d=y+(r-tolerancja);
+            float py_g=y-(height-tolerancja),
+                  py_d=y+(height-tolerancja);
 
-            float px_l=x-(r-tolerancja),
-                  px_p=x+(r-tolerancja);
+            float px_l=x-(width-tolerancja),
+                  px_p=x+(width-tolerancja);
 
 
 
@@ -514,6 +560,19 @@ public class CustomView extends View{
 
         public void Close() {
             runGame=false;
+        }
+
+        public boolean isHead() {
+            return parent==null;
+        }
+
+        public boolean isBody() {
+            return parent!=null;
+        }
+
+        public boolean isTail()
+        {
+            return child==null;
         }
     }
 
