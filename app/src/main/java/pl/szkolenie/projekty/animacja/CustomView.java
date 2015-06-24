@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class CustomView extends View{
-    static Bitmap  g_d_bmp, c_pion_bmp, c_poziom_bmp, c_skret_dl_bmp, c_skret_dp_bmp, c_skret_lg,
+    static Bitmap  g_d_bmp, c_pion_bmp, c_poziom_bmp, c_skret_ld_bmp, c_skret_pd_bmp, c_skret_lg_bmp,
             c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp;
 
     static String TAG="Animacja";
@@ -40,15 +41,24 @@ public class CustomView extends View{
         init();
     }
 
+    static RectF GetRectF(float x1, float y1, float x2, float y2) {
+        float _x1 = Math.min(x1, x2),
+              _x2 = Math.max(x1, x2),
+              _y1 = Math.min(y1, y2),
+              _y2 = Math.max(y1, y2);
+
+        return new RectF(_x1, _y1, _x2, _y2);
+    }
+
     void init()
     {
         if(c_pion_bmp==null)
         {
             c_pion_bmp = LoadBitmap( R.drawable.c_pion);
             c_poziom_bmp = LoadBitmap( R.drawable.c_poziom);
-            c_skret_dl_bmp = LoadBitmap( R.drawable.c_skret_dl);
-            c_skret_dp_bmp = LoadBitmap( R.drawable.c_skret_dp);
-            c_skret_lg = LoadBitmap( R.drawable.c_skret_lg);
+            c_skret_ld_bmp = LoadBitmap( R.drawable.c_skret_ld);
+            c_skret_pd_bmp = LoadBitmap( R.drawable.c_skret_pd);
+            c_skret_lg_bmp = LoadBitmap( R.drawable.c_skret_lg);
             c_skret_pg_bmp = LoadBitmap( R.drawable.c_skret_pg);
             g_d_bmp = LoadBitmap( R.drawable.g_d);
             g_g_bmp = LoadBitmap( R.drawable.g_g);
@@ -166,8 +176,10 @@ public class CustomView extends View{
 
         //rysowanie weza
         for (PartOfBodySnake p : SnakeBody)
-            p.Paint(c);
+            if(!p.isHead())
+                p.Paint(c);
 
+        Head.Paint(c);
 
         if(isGameOver) {
             Random rand=new Random();
@@ -239,6 +251,7 @@ public class CustomView extends View{
 
     public class PartOfBodySnake extends Thread {
 
+        boolean skret=false;
         PartOfBodySnake parent=null;
         PartOfBodySnake child=null;
 
@@ -295,6 +308,11 @@ public class CustomView extends View{
                                 break;
                         }
                     }
+                    //ustaw zmienna boolowska skret - jesli czesc jest na skrecie
+                    if(parent!=null)
+                        skret=parent.kierunek!=kierunek;
+                    else
+                        skret=child.kierunek!=kierunek;
 
                     int i = 0;
                     //ustawianie pozostalych elemenow weza
@@ -451,6 +469,10 @@ public class CustomView extends View{
                 paint.setAntiAlias(true);
                 c.drawCircle(x, y, v, paint);
             }else
+            if(isBody())
+            {
+                PaintBody(c);
+            }else
             if(isHead())
             {
                 PaintHead(c);
@@ -458,60 +480,59 @@ public class CustomView extends View{
                 if(isTail())
                 {
 
-                }else
-                    if(isBody())
-                    {
-                        PaintBody(c);
-                    }
+                }
+
 
         }
 
         private void PaintBody(Canvas c) {
-            Paint paint = new Paint();
-            paint.setColor(color);
-            paint.setAntiAlias(true);
-            if(parent.kierunek != child.kierunek)
-            {
-                if((parent.kierunek== EKierunek.Dol && child.kierunek==EKierunek.Prawa)||
-                        (child.kierunek== EKierunek.Dol && parent.kierunek==EKierunek.Prawa)    )
-                  c.drawBitmap(c_skret_dl_bmp, x, y, paint);
-                else
-                     if((parent.kierunek== EKierunek.Lewa && child.kierunek==EKierunek.Dol) ||
-                             (child.kierunek== EKierunek.Lewa && parent.kierunek==EKierunek.Dol))
-                         c.drawBitmap(c_skret_lg, x, y, paint);
-                     else
-                         if((parent.kierunek== EKierunek.Gora && child.kierunek==EKierunek.Lewa) ||
-                                 (child.kierunek== EKierunek.Gora && parent.kierunek==EKierunek.Lewa) )
-                             c.drawBitmap(c_skret_pg_bmp, x, y, paint);
-                            else
-                             c.drawBitmap(c_skret_dp_bmp, x, y, paint);
+            RectF dsc;
+            if(parent.kierunek != kierunek) {
 
-
-
+                   if ((parent.kierunek == EKierunek.Dol && kierunek == EKierunek.Prawa) ||
+                            (kierunek == EKierunek.Dol && parent.kierunek == EKierunek.Prawa)) {
+                       dsc =GetRectF(parent.x, y, parent.x + width, y+height);
+                       c.drawBitmap(c_skret_ld_bmp, null, dsc, null);//lewy dol
+                    } else if ((parent.kierunek == EKierunek.Lewa && kierunek == EKierunek.Dol) ||
+                            (kierunek == EKierunek.Lewa && parent.kierunek == EKierunek.Dol))
+                        c.drawBitmap(c_skret_lg_bmp, x, y, null);//lewy gora
+                    else if ((parent.kierunek == EKierunek.Gora && kierunek == EKierunek.Lewa) ||
+                            (kierunek == EKierunek.Gora && parent.kierunek == EKierunek.Lewa))
+                        c.drawBitmap(c_skret_pg_bmp, x, y, null);//prawy gora
+                    else
+                        c.drawBitmap(c_skret_pd_bmp, x, y, null);//prawy dol
 
             }else
                 switch(kierunek)
                 {
                     case Prawa:
-                    case Lewa:
-                        c.drawBitmap(c_poziom_bmp, x, y, paint);
-                        break;
+                    case Lewa: {
+                        if (parent != null && parent.parent != null && kierunek != parent.parent.kierunek)
+                            dsc = GetRectF(x, y, parent.parent.x, y + height);
+                        else
+                            dsc = GetRectF(x, y, parent.x, y + height);
 
-                    case Gora:
-                    case Dol:
-                        c.drawBitmap(c_pion_bmp, x, y, paint);
+                        c.drawBitmap(c_poziom_bmp, null, dsc, null);
                         break;
+                    }
+                    case Gora:
+                    case Dol: {
+                        dsc = GetRectF(x, child.y + height, x + width, parent.y);
+                        c.drawBitmap(c_pion_bmp, null, dsc, null);
+                        break;
+                    }
                 }
         }
 
+
+
         private void PaintHead(Canvas c) {
-            Paint paint = new Paint();
-            paint.setColor(color);
-            paint.setAntiAlias(true);
+            RectF dsc;
             switch(kierunek)
             {
                 case Prawa:
-                    c.drawBitmap(g_p_bmp, x, y, null);
+                    dsc = GetRectF(x-15, y, x + width, y+height);
+                    c.drawBitmap(g_p_bmp, null, dsc, null);
                     break;
                 case Lewa:
                     c.drawBitmap(g_l_bmp, x, y, null);
@@ -585,7 +606,7 @@ public class CustomView extends View{
         }
 
         public boolean isBody() {
-            return parent!=null;
+            return parent!=null && child!=null;
         }
 
         public boolean isTail()
