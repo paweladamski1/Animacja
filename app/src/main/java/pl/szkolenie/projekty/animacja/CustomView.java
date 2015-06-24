@@ -492,26 +492,44 @@ public class CustomView extends View{
             else {
                 switch (kierunek) {
                     case Prawa: {
-                        if (parent != null && parent.parent != null && kierunek != parent.parent.kierunek)
+                        if (parent.parent != null && kierunek != parent.parent.kierunek)
                             dsc = GetRectF(x, y, parent.parent.x, y + height);
                         else
-                            dsc = GetRectF(x, y, parent.x, y + height);
+                            dsc = GetRectF(child.x+child.width, y, parent.x, y + height);
+                        c.drawBitmap(c_poziom_bmp, null, dsc, null);
                         break;
                     }
                     case Lewa: {
-
+                        if (parent.parent != null && kierunek != parent.parent.kierunek) {
+                            dsc = GetRectF(x+width, y, parent.parent.x+parent.parent.width, y + height);
+                        }
+                       else
+                            dsc = GetRectF(child.x, y, parent.x+parent.width, y + height);
+                        c.drawBitmap(c_poziom_bmp, null, dsc, null);
                         break;
                     }
-                    case Gora:
+                    case Gora: {
+                        if ( parent.parent != null && kierunek != parent.parent.kierunek)
+                            dsc = GetRectF(x, parent.parent.y+parent.parent.height, x+width, y+width);
+                        else
+                            dsc = GetRectF(x, y, x + width, child.y);
+
+                        c.drawBitmap(c_pion_bmp, null, dsc, null);
+                        break;
+                    }
                     case Dol: {
-                        dsc = GetRectF(x, child.y + height, x + width, parent.y);
+                        if ( parent.parent != null && kierunek != parent.parent.kierunek) {
+                            dsc = GetRectF(x, parent.parent.y, x + width, parent.y - parent.height);
+
+                        }
+                        else
+                            dsc = GetRectF(x, child.y+child.height, x + width, y+height);
                         c.drawBitmap(c_pion_bmp, null, dsc, null);
                         break;
                     }
                 }
             }
-            if(dsc!=null)
-                c.drawBitmap(c_poziom_bmp, null, dsc, null);
+
         }
 
         private void PaintBodyCurve(Canvas c)
