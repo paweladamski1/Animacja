@@ -510,7 +510,8 @@ public class CustomView extends View{
                     }
                 }
             }
-            c.drawBitmap(c_poziom_bmp, null, dsc, null);
+            if(dsc!=null)
+                c.drawBitmap(c_poziom_bmp, null, dsc, null);
         }
 
         private void PaintBodyCurve(Canvas c)
