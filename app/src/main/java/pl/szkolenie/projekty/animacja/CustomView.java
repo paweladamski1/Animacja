@@ -486,33 +486,20 @@ public class CustomView extends View{
         }
 
         private void PaintBody(Canvas c) {
-            RectF dsc;
-            if(parent.kierunek != kierunek) {
-
-                   if ((parent.kierunek == EKierunek.Dol && kierunek == EKierunek.Prawa) ||
-                            (kierunek == EKierunek.Dol && parent.kierunek == EKierunek.Prawa)) {
-                       dsc =GetRectF(parent.x, y, parent.x + width, y+height);
-                       c.drawBitmap(c_skret_ld_bmp, null, dsc, null);//lewy dol
-                    } else if ((parent.kierunek == EKierunek.Lewa && kierunek == EKierunek.Dol) ||
-                            (kierunek == EKierunek.Lewa && parent.kierunek == EKierunek.Dol))
-                        c.drawBitmap(c_skret_lg_bmp, x, y, null);//lewy gora
-                    else if ((parent.kierunek == EKierunek.Gora && kierunek == EKierunek.Lewa) ||
-                            (kierunek == EKierunek.Gora && parent.kierunek == EKierunek.Lewa))
-                        c.drawBitmap(c_skret_pg_bmp, x, y, null);//prawy gora
-                    else
-                        c.drawBitmap(c_skret_pd_bmp, x, y, null);//prawy dol
-
-            }else
-                switch(kierunek)
-                {
-                    case Prawa:
-                    case Lewa: {
+            RectF dsc=null;
+            if(parent.kierunek != kierunek)
+                PaintBodyCurve(c);
+            else {
+                switch (kierunek) {
+                    case Prawa: {
                         if (parent != null && parent.parent != null && kierunek != parent.parent.kierunek)
                             dsc = GetRectF(x, y, parent.parent.x, y + height);
                         else
                             dsc = GetRectF(x, y, parent.x, y + height);
+                        break;
+                    }
+                    case Lewa: {
 
-                        c.drawBitmap(c_poziom_bmp, null, dsc, null);
                         break;
                     }
                     case Gora:
@@ -522,8 +509,34 @@ public class CustomView extends View{
                         break;
                     }
                 }
+            }
+            c.drawBitmap(c_poziom_bmp, null, dsc, null);
         }
 
+        private void PaintBodyCurve(Canvas c)
+        {
+            RectF dsc;
+            if (parent.kierunek == EKierunek.Dol && kierunek == EKierunek.Prawa)
+            { //z lewej w dół
+                dsc =GetRectF(parent.x, y, parent.x + width, y+height);
+                c.drawBitmap(c_skret_ld_bmp, null, dsc, null);
+            } else
+            if (kierunek == EKierunek.Gora && parent.kierunek == EKierunek.Lewa)
+            { //z dołu do lewej
+                dsc =GetRectF(x, parent.y, x + width, parent.y + height);
+                c.drawBitmap(c_skret_ld_bmp, null, dsc, null);
+            }
+                   /*
+
+                   else if ((parent.kierunek == EKierunek.Lewa && kierunek == EKierunek.Dol) ||
+                            (kierunek == EKierunek.Lewa && parent.kierunek == EKierunek.Dol))
+                        c.drawBitmap(c_skret_lg_bmp, x, y, null);//lewy gora
+                    else if ((parent.kierunek == EKierunek.Gora && kierunek == EKierunek.Lewa) ||
+                            (kierunek == EKierunek.Gora && parent.kierunek == EKierunek.Lewa))
+                        c.drawBitmap(c_skret_pg_bmp, x, y, null);//prawy gora
+                    else
+                        c.drawBitmap(c_skret_pd_bmp, x, y, null);//prawy dol*/
+        }
 
 
         private void PaintHead(Canvas c) {
