@@ -545,16 +545,39 @@ public class CustomView extends View{
                 dsc =GetRectF(x, parent.y, x + width, parent.y + height);
                 c.drawBitmap(c_skret_ld_bmp, null, dsc, null);
             }
-                   /*
 
-                   else if ((parent.kierunek == EKierunek.Lewa && kierunek == EKierunek.Dol) ||
-                            (kierunek == EKierunek.Lewa && parent.kierunek == EKierunek.Dol))
-                        c.drawBitmap(c_skret_lg_bmp, x, y, null);//lewy gora
-                    else if ((parent.kierunek == EKierunek.Gora && kierunek == EKierunek.Lewa) ||
-                            (kierunek == EKierunek.Gora && parent.kierunek == EKierunek.Lewa))
-                        c.drawBitmap(c_skret_pg_bmp, x, y, null);//prawy gora
-                    else
-                        c.drawBitmap(c_skret_pd_bmp, x, y, null);//prawy dol*/
+            if (parent.kierunek == EKierunek.Dol && kierunek == EKierunek.Lewa)
+            { //z prawej w dół
+                dsc =GetRectF(parent.x, y, parent.x + width, y+height);
+                c.drawBitmap(c_skret_pd_bmp, null, dsc, null);
+            } else
+            if (kierunek == EKierunek.Gora && parent.kierunek == EKierunek.Prawa)
+            { //z dołu do prawej
+                dsc =GetRectF(x, parent.y, x + width, parent.y + height);
+                c.drawBitmap(c_skret_pd_bmp, null, dsc, null);
+            }
+            if (parent.kierunek == EKierunek.Gora && kierunek == EKierunek.Prawa)
+            { //z lewej w gore
+                dsc =GetRectF(parent.x, y, parent.x + width, y+height);
+                c.drawBitmap(c_skret_lg_bmp, null, dsc, null);
+            } else
+            if (kierunek == EKierunek.Dol && parent.kierunek == EKierunek.Lewa)
+            { //z gory do prawej
+                dsc =GetRectF(x, parent.y, x + width, parent.y + height);
+                c.drawBitmap(c_skret_lg_bmp, null, dsc, null);
+            }
+            if (parent.kierunek == EKierunek.Gora && kierunek == EKierunek.Lewa)
+            { //z prawej w gore
+                dsc =GetRectF(parent.x, y, parent.x + width, y+height);
+                c.drawBitmap(c_skret_pg_bmp, null, dsc, null);
+            } else
+            if (kierunek == EKierunek.Dol && parent.kierunek == EKierunek.Prawa)
+            { //z gory do prawej
+                dsc =GetRectF(x, parent.y, x + width, parent.y + height);
+                c.drawBitmap(c_skret_pg_bmp, null, dsc, null);
+            }
+
+
         }
 
 
