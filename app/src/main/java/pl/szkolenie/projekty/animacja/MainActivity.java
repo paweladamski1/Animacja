@@ -1,14 +1,15 @@
 package pl.szkolenie.projekty.animacja;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 
-
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
     public static MainActivity This;
     CustomView gameView;
@@ -16,6 +17,11 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         This=this;
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+
         setContentView(R.layout.activity_main);
         Button StartBtn=(Button)findViewById(R.id.StartBtn);
         gameView=(CustomView)findViewById(R.id.GameView);

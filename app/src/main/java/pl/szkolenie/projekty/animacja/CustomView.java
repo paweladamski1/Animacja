@@ -18,7 +18,7 @@ import java.util.Random;
 
 public class CustomView extends View {
     static Bitmap g_d_bmp, c_pion_bmp, c_poziom_bmp, c_skret_ld_bmp, c_skret_pd_bmp, c_skret_lg_bmp,
-            c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp, cherry_bmp;
+            c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp, cherry_bmp, bk_bmp;
     static String TAG = "Animacja";
     PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody = new ArrayList<PartOfBodySnake>();
@@ -67,6 +67,7 @@ public class CustomView extends View {
             o_l_bmp = LoadBitmap(R.drawable.o_l);
             o_p_bmp = LoadBitmap(R.drawable.o_p);
             cherry_bmp = LoadBitmap(R.drawable.cherry);
+            bk_bmp=LoadBitmap(R.drawable.bk);
         }
 
         if (Head != null) {
@@ -150,39 +151,48 @@ public class CustomView extends View {
 
     @Override
     protected void onDraw(Canvas c) {
+        try {
+            //rysowanie tla
+            c.drawBitmap(bk_bmp, null, new RectF(0, 0, getWidth(), getHeight()), null);
 
-        //rysowanie pokarmu
-        Food.Paint(c);
+            //rysowanie pokarmu
+            Food.Paint(c);
 
-        //rysowanie weza
-        for (PartOfBodySnake p : SnakeBody)
-            if (!p.isHead())
-                p.Paint(c);
+            //rysowanie weza
+            try {
+                for (PartOfBodySnake p : SnakeBody)
+                    if (!p.isHead())
+                        p.Paint(c);
+            } catch (Exception ex) {
+            }
 
-        Head.Paint(c);
+            Head.Paint(c);
 
-        if (isGameOver) {
-            Random rand = new Random();
-            Paint p = new Paint();
-            p.setColor(Color.rgb(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)));
-            p.setTextSize(60);
-            p.setTextAlign(Paint.Align.CENTER);
-            c.drawText("Game Over\n zdobyłeś(aś) " + ptk + " punktów", getWidth() / 2, getHeight() / 2, p);
-        } else if (isPause) {
-            Paint p = new Paint();
-            p.setColor(Color.GRAY);
-            p.setTextSize(60);
-            p.setTextAlign(Paint.Align.CENTER);
-            c.drawText("Pause", getWidth() / 2, getHeight() / 2, p);
-        } else {
-            Paint p = new Paint();
-            p.setColor(Color.BLACK);
-            p.setTextSize(30);
-            p.setTextAlign(Paint.Align.LEFT);
-            c.drawText("Punkty: " + ptk, 25, 50, p);
+            if (isGameOver) {
+                Random rand = new Random();
+                Paint p = new Paint();
+                p.setColor(Color.rgb(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)));
+                p.setTextSize(60);
+                p.setTextAlign(Paint.Align.CENTER);
+                c.drawText("Game Over\n zdobyłeś(aś) " + ptk + " punktów", getWidth() / 2, getHeight() / 2, p);
+            } else if (isPause) {
+                Paint p = new Paint();
+                p.setColor(Color.GRAY);
+                p.setTextSize(60);
+                p.setTextAlign(Paint.Align.CENTER);
+                c.drawText("Pause", getWidth() / 2, getHeight() / 2, p);
+            } else {
+                Paint p = new Paint();
+                p.setColor(Color.BLACK);
+                p.setTextSize(30);
+                p.setTextAlign(Paint.Align.LEFT);
+                c.drawText("Punkty: " + ptk, 25, 50, p);
+            }
+
+            invalidate();
+        } catch (Exception ex) {
+
         }
-
-        invalidate();
     }
 
     public void Start() {
@@ -288,18 +298,21 @@ public class CustomView extends View {
                     }
 
                     int i = 0;
+
                     //ustawianie pozostalych elemenow weza
-                    for (PartOfBodySnake p : SnakeBody) {
-                        if (p.parent != null)
-                            p.refreshPositionBody();
-                        if (i > 1)
-                            if (isColision(p, v)) {
-                                GameOver();
+                   try {
+                       for (PartOfBodySnake p : SnakeBody) {
+                           if (p.parent != null)
+                               p.refreshPositionBody();
+                           if (i > 1)
+                               if (isColision(p, v)) {
+                                   GameOver();
 
-                            }
-                        i++;
-
-                    }
+                               }
+                           i++;
+                       }
+                   }
+                   catch(Exception ex){}
 
                     if (isColision(Food, 0) && !Food.colisionDetect) {
 
