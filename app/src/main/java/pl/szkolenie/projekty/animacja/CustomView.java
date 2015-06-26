@@ -18,7 +18,7 @@ import java.util.Random;
 
 public class CustomView extends View {
     static Bitmap g_d_bmp, c_pion_bmp, c_poziom_bmp, c_skret_ld_bmp, c_skret_pd_bmp, c_skret_lg_bmp,
-            c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp;
+            c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp, cherry_bmp;
     static String TAG = "Animacja";
     PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody = new ArrayList<PartOfBodySnake>();
@@ -66,6 +66,7 @@ public class CustomView extends View {
             o_g_bmp = LoadBitmap(R.drawable.o_g);
             o_l_bmp = LoadBitmap(R.drawable.o_l);
             o_p_bmp = LoadBitmap(R.drawable.o_p);
+            cherry_bmp = LoadBitmap(R.drawable.cherry);
         }
 
         if (Head != null) {
@@ -80,7 +81,6 @@ public class CustomView extends View {
 
         Head = new PartOfBodySnake(false, null);
         this.SnakeBody.add(Head);
-        Head.color = Color.GREEN;
         Head.x = 200;
         Head.Add().Add().Add().Add().Add().Add().Add().Add().Add().Add();
 
@@ -110,7 +110,6 @@ public class CustomView extends View {
         float tx = event.getX(), ty = event.getY();
         float rx = tx - Head.x;
         float ry = ty - Head.y;
-        LOG_Kulka(rx, ry);
         switch (Head.direction) {
             case RIGHT: {
                 if (ry > Head.height)
@@ -145,16 +144,9 @@ public class CustomView extends View {
                 break;
             }
         }
-
         //return super.onTouchEvent(event);
         return true;
     }
-
-    private void LOG_Kulka(float rx, float ry) {
-        //Log.d("Animacja", Head.direction+" rx="+rx+"; ry="+ry);
-    }
-
-    //int red, green, blue;
 
     @Override
     protected void onDraw(Canvas c) {
@@ -189,14 +181,6 @@ public class CustomView extends View {
             p.setTextAlign(Paint.Align.LEFT);
             c.drawText("Punkty: " + ptk, 25, 50, p);
         }
-
-
-
-      /*  Paint paint=new Paint();
-        paint.setColor(Color.YELLOW);
-
-
-        c.drawCircle(200, 200, 20, paint);*/
 
         invalidate();
     }
@@ -248,20 +232,19 @@ public class CustomView extends View {
 
     public class PartOfBodySnake extends Thread {
 
-        //boolean skret=false;
         PartOfBodySnake parent = null;
         PartOfBodySnake child = null;
 
         boolean isFood = false, colisionDetect = false, runGame = true;
         float x = 50, y = 75, width = 42, height = 42, v = 5;
         int No = 1;
-        int color = Color.parseColor("#0000FF");
-        private EKierunek direction = EKierunek.RIGHT;
+
+        private EDIRECTION direction = EDIRECTION.RIGHT;
 
         int sleepValue = 20;
 
         float vx = -5, vy = -5;//kiedy ma zmienić direction
-        EKierunek vDirection; //na jaki
+        EDIRECTION vDirection; //na jaki
 
         //constructor
         public PartOfBodySnake(boolean isFood, PartOfBodySnake parent) {
@@ -371,34 +354,34 @@ public class CustomView extends View {
         }
 
         public void refreshPositionBody() {
-           boolean changeDirection=false;
+            boolean changeDirection = false;
             if (isChangeDirection()) {
                 vx = parent.vx;
                 vy = parent.vy;
-                changeDirection=true;
+                changeDirection = true;
                 setChangeDirection(parent.vDirection);
             }
             Position parentPos = parent.getPosition();
 
             switch (direction) {
                 case RIGHT:
-                    if(changeDirection)
-                        y=parent.y;
+                    if (changeDirection)
+                        y = parent.y;
                     x += v;
                     break;
                 case LEFT:
-                    if(changeDirection)
-                        y=parent.y;
+                    if (changeDirection)
+                        y = parent.y;
                     x -= v;
                     break;
                 case UP:
-                    if(changeDirection)
-                        x=parent.x;
+                    if (changeDirection)
+                        x = parent.x;
                     y -= v;
                     break;
                 case DOWN:
-                    if(changeDirection)
-                        x=parent.x;
+                    if (changeDirection)
+                        x = parent.x;
                     y += v;
 
                     break;
@@ -411,10 +394,7 @@ public class CustomView extends View {
 
         public void Paint(Canvas c) {
             if (isFood) {
-                Paint paint = new Paint();
-                paint.setColor(Color.GREEN);
-                paint.setAntiAlias(true);
-                c.drawCircle(x, y, v, paint);
+                PaintCherry(c);
             } else if (isBody()) {
                 PaintBody(c);
             } else if (isHead()) {
@@ -429,37 +409,50 @@ public class CustomView extends View {
             if (isHead()) {
                 c.drawText("Głowa: " + x + "|" + y, x + 50, y, paint);
             } else if (isTail()) {
-                c.drawText("Ogon: " + x + "|" + y, x + 50, y, paint);
+                RectF parentRc = parent.getPosition().Pos;
+                c.drawText("przedogon: " + parentRc, parent.x + 50, parent.y - 60, paint);
+                c.drawText("Ogon: " + getPosition().Pos, x + 50, y, paint);
             }
+        }
 
-           /* c.drawRect(vx, vy, vx + 5, vy + 5, paint);
-            paint.setColor(Color.RED);
-            c.drawCircle(x, y, 1, paint);
-            if (a != null && b != null) {
-                paint.setColor(Color.YELLOW);
-                c.drawCircle(a.x, a.y, 5, paint);
-                c.drawCircle(b.x, b.y, 5, paint);
-            }*/
+        private void PaintCherry(Canvas c) {
+
+            RectF dsc = getPosition().Pos;
+            dsc.left -= 20;
+            dsc.right += 20;
+            dsc.top -= 20;
+            dsc.bottom += 20;
+            c.drawBitmap(cherry_bmp, null, dsc, null);
+
         }
 
         private void PaintTail(Canvas c) {
-            RectF dsc = this.getPosition().Pos;
-           switch (direction) {
+
+            EDIRECTION direction = parent.direction;
+
+
+            RectF dsc = parent.lastPosition.Pos;
+            switch (direction) {
                 case RIGHT: {
+                    dsc = new RectF(dsc.left - width, dsc.top, dsc.left, dsc.bottom);
                     c.drawBitmap(o_p_bmp, null, dsc, null);
                     break;
                 }
                 case LEFT: {
+
+                    dsc = new RectF(dsc.right, dsc.top, dsc.right + width, dsc.bottom);
                     c.drawBitmap(o_l_bmp, null, dsc, null);
                     break;
                 }
                 case UP: {
+                    dsc = new RectF(dsc.left, dsc.bottom, dsc.right, dsc.bottom + height);
                     c.drawBitmap(o_g_bmp, null, dsc, null);
                     break;
                 }
                 case DOWN: {
-                    c.drawBitmap(o_d_bmp, null, dsc, null);
 
+                    dsc = new RectF(dsc.left, dsc.top - height, dsc.right, dsc.top);
+                    c.drawBitmap(o_d_bmp, null, dsc, null);
                     break;
                 }
             }
@@ -472,26 +465,30 @@ public class CustomView extends View {
             else {
                 Position posParent = parent.getPosition();
                 Position posChild = child.getPosition();
+                lastPosition = getPosition();
                 switch (direction) {
                     case RIGHT: {
-                        dsc = GetRectF(posChild.Pos.right-2, y, posParent.Pos.left+2, y + height);
+                        dsc = GetRectF(posChild.Pos.right - 2, y, posParent.Pos.left + 2, y + height);
+                        lastPosition.Pos = dsc;
                         c.drawBitmap(c_poziom_bmp, null, dsc, null);
                         break;
                     }
                     case LEFT: {
-                        dsc = GetRectF(posChild.Pos.left+2, y, posParent.Pos.right-2, y + height);
+                        dsc = GetRectF(posChild.Pos.left + 2, y, posParent.Pos.right - 2, y + height);
+                        lastPosition.Pos = dsc;
                         c.drawBitmap(c_poziom_bmp, null, dsc, null);
                         break;
                     }
                     case UP: {
-                        dsc = GetRectF(x, posParent.Pos.bottom-2, x + height, posChild.Pos.top+2);
+                        dsc = GetRectF(x, posParent.Pos.bottom - 2, x + height, posChild.Pos.top + 2);
+                        lastPosition.Pos = dsc;
                         c.drawBitmap(c_pion_bmp, null, dsc, null);
                         break;
                     }
                     case DOWN: {
-                        dsc = GetRectF(x, posParent.Pos.top+2, x + height, posChild.Pos.bottom-2);
+                        dsc = GetRectF(x, posParent.Pos.top + 2, x + height, posChild.Pos.bottom - 2);
+                        lastPosition.Pos = dsc;
                         c.drawBitmap(c_pion_bmp, null, dsc, null);
-
                         break;
                     }
                 }
@@ -499,30 +496,46 @@ public class CustomView extends View {
         }
 
         private void PaintBodyCurve(Canvas c) {
-            Position p = this.getPosition();
+            Position p = this.getPosition(this.direction);
+            RectF rcParent = parent.getPosition().Pos;
             switch (p.curve) {
                 case None:
                     break;
                 case L_D: {
-                    RectF r = new RectF(p.Pos.left, p.Pos.bottom, p.Pos.right, parent.getPosition().Pos.top);
+                    RectF r = new RectF(p.Pos.left, p.Pos.bottom, p.Pos.right, rcParent.top);
                     c.drawBitmap(c_pion_bmp, null, r, null);
+
+                    r = new RectF(rcParent.right, p.Pos.top, p.Pos.left, p.Pos.bottom);//dopelnienie po lewej stronie
+                    c.drawBitmap(c_poziom_bmp, null, r, null);
+
                     c.drawBitmap(c_skret_ld_bmp, null, p.Pos, null);
 
                     break;
                 }
-                case L_U: {
-                    RectF r = new RectF(p.Pos.left, parent.getPosition().Pos.bottom, p.Pos.right, p.Pos.top );
-                    c.drawBitmap(c_pion_bmp, null, r, null);
-
+                case L_U: {//lewa gora
+                    RectF r = new RectF(p.Pos.left, rcParent.bottom, p.Pos.right, p.Pos.top);
+                    c.drawBitmap(c_pion_bmp, null, r, null);//dopelnienie na gorze pionowe
+                    r = new RectF(rcParent.right, p.Pos.top, p.Pos.left, p.Pos.bottom);//dopelnienie po lewej stronie
+                    c.drawBitmap(c_poziom_bmp, null, r, null);
                     c.drawBitmap(c_skret_lg_bmp, null, p.Pos, null);
                     break;
                 }
-                case R_D:
+                case R_D: {
+                    RectF r = new RectF(p.Pos.left, p.Pos.bottom, p.Pos.right, rcParent.top);
+                    c.drawBitmap(c_pion_bmp, null, r, null);
+                    r = new RectF(p.Pos.right, p.Pos.top, rcParent.left, p.Pos.bottom);//dopelnienie po prawej stronie stronie
+                    c.drawBitmap(c_poziom_bmp, null, r, null);
                     c.drawBitmap(c_skret_pd_bmp, null, p.Pos, null);
                     break;
-                case R_U:
+                }
+                case R_U: {
+                    RectF r = new RectF(p.Pos.left, rcParent.bottom, p.Pos.right, p.Pos.top);
+                    c.drawBitmap(c_pion_bmp, null, r, null);
+                    r = new RectF(p.Pos.right, p.Pos.top, rcParent.left, p.Pos.bottom);//dopelnienie po prawej stronie stronie
+                    c.drawBitmap(c_poziom_bmp, null, r, null);
                     c.drawBitmap(c_skret_pg_bmp, null, p.Pos, null);
                     break;
+                }
             }
         }
 
@@ -530,22 +543,26 @@ public class CustomView extends View {
             RectF pos = getPosition().Pos;
             switch (direction) {
                 case RIGHT:
+
                     c.drawBitmap(g_p_bmp, null, pos, null);
                     break;
                 case LEFT:
+
                     c.drawBitmap(g_l_bmp, null, pos, null);
                     break;
                 case UP:
+
                     c.drawBitmap(g_g_bmp, null, pos, null);
                     break;
                 case DOWN:
+
                     c.drawBitmap(g_d_bmp, null, pos, null);
                     break;
             }
         }
 
-        void setChangeDirection(EKierunek direction) {
-            Log.d(TAG, No + "Zmiana kierunku z " + this.direction + " na " + direction);
+        void setChangeDirection(EDIRECTION direction) {
+            //Log.d(TAG, No + "Zmiana kierunku z " + this.direction + " na " + direction);
             if (isHead())
                 switch (this.direction) {
                     case RIGHT:
@@ -596,52 +613,40 @@ public class CustomView extends View {
                         return a.x <= parent.vx && b.x >= parent.vx &&
                                 a.y >= parent.vy;
                 }
-
-                /*return
-                        (parent.vx >= this.x && parent.vx <= this.x + 2) &&
-                                (parent.vy >= this.y && parent.vy <= this.y + 2) &&
-                                parent.vDirection != direction;*/
             }
 
             if (child != null) {
-                return this.vx != child.vx && this.vy != child.vy;
+                return this.vx != child.vx && this.vy != child.vy && !isGameOver && !isPause;
             } else
                 return false;
         }
 
-        public void Left() {
-            if (direction != EKierunek.RIGHT && !isChangeDirection()) {
-                setChangeDirection(EKierunek.LEFT);
-                direction = EKierunek.LEFT;
 
-                Log.d(TAG, "LEWA");
+        public void Left() {
+            if (direction != EDIRECTION.RIGHT && !isChangeDirection()) {
+                setChangeDirection(EDIRECTION.LEFT);
+                direction = EDIRECTION.LEFT;
             }
         }
 
         public void Down() {
-            if (direction != EKierunek.UP && !isChangeDirection()) {
-                setChangeDirection(EKierunek.DOWN);
-                direction = EKierunek.DOWN;
-
-                Log.d(TAG, "DOL");
+            if (direction != EDIRECTION.UP && !isChangeDirection()) {
+                setChangeDirection(EDIRECTION.DOWN);
+                direction = EDIRECTION.DOWN;
             }
         }
 
         public void Right() {
-            if (direction != EKierunek.LEFT && !isChangeDirection()) {
-                setChangeDirection(EKierunek.RIGHT);
-                direction = EKierunek.RIGHT;
-
-                Log.d(TAG, "PRAWA");
+            if (direction != EDIRECTION.LEFT && !isChangeDirection()) {
+                setChangeDirection(EDIRECTION.RIGHT);
+                direction = EDIRECTION.RIGHT;
             }
         }
 
         public void Up() {
-            if (direction != EKierunek.DOWN && !isChangeDirection()) {
-                setChangeDirection(EKierunek.UP);
-                direction = EKierunek.UP;
-
-                Log.d(TAG, "GORA");
+            if (direction != EDIRECTION.DOWN && !isChangeDirection()) {
+                setChangeDirection(EDIRECTION.UP);
+                direction = EDIRECTION.UP;
             }
         }
 
@@ -661,7 +666,6 @@ public class CustomView extends View {
 
             boolean colision = p.x > px_l && p.x < px_p && p.y > py_g && p.y < py_d;
 
-
             return colision;
         }
 
@@ -678,39 +682,55 @@ public class CustomView extends View {
         }
 
         public boolean isTail() {
-            return child == null;
+            return child == null && !isFood;
         }
 
         public boolean isCurve() {
             return parent != null && parent.direction != direction;
         }
 
-
         public Position getPosition() {
+            return getPosition(this.direction);
+        }
+
+        public Position getLastPosition() {
+            return getPosition(this.direction);
+        }
+
+        Position lastPosition;
+
+        public Position getPosition(EDIRECTION direction) {
+            Position ret = null;
             if (isCurve()) {
-                if (parent.direction == EKierunek.DOWN && direction == EKierunek.RIGHT) { //z lewej w dół
-                    return new Position(ECURVE.L_D, GetRectF(parent.x, y, parent.x + width, y + height));
-                } else if (direction == EKierunek.UP && parent.direction == EKierunek.LEFT) { //z dołu do lewej
-                    return new Position(ECURVE.L_D, GetRectF(x, parent.y, x + width, parent.y + height));
-                } else if (parent.direction == EKierunek.DOWN && direction == EKierunek.LEFT) { //z prawej w dół
-                    return new Position(ECURVE.R_D, GetRectF(parent.x, y, parent.x + width, y + height));
-                } else if (direction == EKierunek.UP && parent.direction == EKierunek.RIGHT) { //z dołu do prawej
-                    return new Position(ECURVE.R_D, GetRectF(x, parent.y, x + width, parent.y + height));
-                } else if (parent.direction == EKierunek.UP && direction == EKierunek.RIGHT) { //z lewej w gore
-                    return new Position(ECURVE.L_U, GetRectF(parent.x, y, parent.x + width, y + height));
-                } else if (direction == EKierunek.DOWN && parent.direction == EKierunek.LEFT) { //z gory do prawej
-                    return new Position(ECURVE.L_U, GetRectF(x, parent.y, x + width, parent.y + height));
-                } else if (parent.direction == EKierunek.UP && direction == EKierunek.LEFT) { //z prawej w gore
-                    return new Position(ECURVE.R_U, GetRectF(parent.x, y, parent.x + width, y + height));
-                } else if (direction == EKierunek.DOWN && parent.direction == EKierunek.RIGHT) { //z gory do prawej
-                    return new Position(ECURVE.R_U, GetRectF(x, parent.y, x + width, parent.y + height));
+                if (parent.direction == EDIRECTION.DOWN && direction == EDIRECTION.RIGHT) { //z lewej w dół
+                    ret = new Position(ECURVE.L_D, GetRectF(parent.x, y, parent.x + width, y + height));
+                } else if (direction == EDIRECTION.UP && parent.direction == EDIRECTION.LEFT) { //z dołu do lewej
+                    ret = new Position(ECURVE.L_D, GetRectF(x, parent.y, x + width, parent.y + height));
+                } else if (parent.direction == EDIRECTION.DOWN && direction == EDIRECTION.LEFT) { //z prawej w dół
+                    ret = new Position(ECURVE.R_D, GetRectF(parent.x, y, parent.x + width, y + height));
+                } else if (direction == EDIRECTION.UP && parent.direction == EDIRECTION.RIGHT) { //z dołu do prawej
+                    ret = new Position(ECURVE.R_D, GetRectF(x, parent.y, x + width, parent.y + height));
+                } else if (parent.direction == EDIRECTION.UP && direction == EDIRECTION.RIGHT) { //z lewej w gore
+                    ret = new Position(ECURVE.L_U, GetRectF(parent.x, y, parent.x + width, y + height));
+                } else if (direction == EDIRECTION.DOWN && parent.direction == EDIRECTION.LEFT) { //z gory do prawej
+                    ret = new Position(ECURVE.L_U, GetRectF(x, parent.y, x + width, parent.y + height));
+                } else if (parent.direction == EDIRECTION.UP && direction == EDIRECTION.LEFT) { //z prawej w gore
+                    ret = new Position(ECURVE.R_U, GetRectF(parent.x, y, parent.x + width, y + height));
+                } else if (direction == EDIRECTION.DOWN && parent.direction == EDIRECTION.RIGHT) { //z gory do prawej
+                    ret = new Position(ECURVE.R_U, GetRectF(x, parent.y, x + width, parent.y + height));
+                }
+                if (ret != null) {
+                    lastPosition = ret;
+                    return ret;
                 }
             }
-            return new Position(ECURVE.None, GetRectF(x, y, x + width, y + height));
+            ret = new Position(ECURVE.None, GetRectF(x, y, x + width, y + height));
+            lastPosition = ret;
+            return ret;
         }
     }
 
-    enum EKierunek {RIGHT, LEFT, UP, DOWN}
+    enum EDIRECTION {RIGHT, LEFT, UP, DOWN}
 
     public enum ECURVE {None, L_D, L_U, R_D, R_U}
 
@@ -723,5 +743,4 @@ public class CustomView extends View {
         public ECURVE curve = ECURVE.None;
         public RectF Pos;
     }
-
 }
