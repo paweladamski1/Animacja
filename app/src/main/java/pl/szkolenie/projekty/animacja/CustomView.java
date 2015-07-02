@@ -17,9 +17,11 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class CustomView extends View {
-    static Bitmap g_d_bmp, c_pion_bmp, c_poziom_bmp, c_skret_ld_bmp, c_skret_pd_bmp, c_skret_lg_bmp,
+    static Bitmap g_d_bmp, c_pion_bmp, c_poziom_bmp, c_skret_ld_bmp, c_skret_pd_bmp,
+            c_skret_lg1_bmp,
             c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp, cherry_bmp, bk_bmp;
     static String TAG = "Animacja";
+    int frame=0;
     PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody = new ArrayList<PartOfBodySnake>();
     PartOfBodySnake Food = new PartOfBodySnake(true, null);
@@ -50,13 +52,21 @@ public class CustomView extends View {
         return new RectF(_x1, _y1, _x2, _y2);
     }
 
+    static RectF GetRectF_IfOk(float x1, float y1, float x2, float y2) {
+
+        if(x1<x2 && y1<y2)
+            return new RectF(x1, y1, x2, y2);
+        return null;
+    }
+
     void init() {
         if (c_pion_bmp == null) {
             c_pion_bmp = LoadBitmap(R.drawable.c_pion);
             c_poziom_bmp = LoadBitmap(R.drawable.c_poziom);
             c_skret_ld_bmp = LoadBitmap(R.drawable.c_skret_ld);
             c_skret_pd_bmp = LoadBitmap(R.drawable.c_skret_pd);
-            c_skret_lg_bmp = LoadBitmap(R.drawable.c_skret_lg);
+            c_skret_lg1_bmp = LoadBitmap(R.drawable.c_skret_lg1);
+
             c_skret_pg_bmp = LoadBitmap(R.drawable.c_skret_pg);
             g_d_bmp = LoadBitmap(R.drawable.g_d);
             g_g_bmp = LoadBitmap(R.drawable.g_g);
@@ -75,8 +85,10 @@ public class CustomView extends View {
             Head.Close();
         }
 
-        Food.x = 500;
-        Food.y = 500;
+        Random g = new Random();
+        Food.x = 15;
+        Food.y = 15;
+
         Food.width = 5;
         Food.height = 5;
 
@@ -174,7 +186,8 @@ public class CustomView extends View {
                 p.setColor(Color.rgb(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)));
                 p.setTextSize(60);
                 p.setTextAlign(Paint.Align.CENTER);
-                c.drawText("Game Over\n zdobyłeś(aś) " + ptk + " punktów", getWidth() / 2, getHeight() / 2, p);
+                c.drawText("Game Over", getWidth() / 2, getHeight() / 2, p);
+                c.drawText("Zdobyłeś(aś)"+ptk+" ptk.", getWidth() / 2, getHeight() / 2+50, p);
             } else if (isPause) {
                 Paint p = new Paint();
                 p.setColor(Color.GRAY);
@@ -244,6 +257,8 @@ public class CustomView extends View {
 
         PartOfBodySnake parent = null;
         PartOfBodySnake child = null;
+        RectF PaintedRc=new RectF(0,0,0,0);
+
 
         boolean isFood = false, colisionDetect = false, runGame = true;
         float x = 50, y = 75, width = 42, height = 42, v = 5;
@@ -317,20 +332,20 @@ public class CustomView extends View {
                     if (isColision(Food, 0) && !Food.colisionDetect) {
 
                         Log.d(TAG, "Kolizja");
-                        Food.colisionDetect = true;//bloakada aby nie mozna bylo wykryc kolizji w kolejnej petli
+                        Food.colisionDetect = true;//blokada aby nie mozna bylo wykryc kolizji w kolejnej petli
 
                         PartOfBodySnake last = SnakeBody.get(SnakeBody.size() - 1);//pobieramy ogon
                         last.Add();
                         Random g = new Random();
-                        Food.x = g.nextInt(500);
-                        Food.y = g.nextInt(500);
-                        Random r = new Random();
-                        ptk += r.nextInt(25);
+                        Food.x = g.nextInt(getWidth()-50);
+                        Food.y = g.nextInt(getHeight()-50);
+                        ptk += g.nextInt(25);
 
                     } else if (!isColision(Food, 0))
                         Food.colisionDetect = false;
                 }
                 try {
+                    frame++;
                     Thread.sleep(sleepValue);
 
                 } catch (InterruptedException e) {
@@ -419,13 +434,13 @@ public class CustomView extends View {
             paint.setColor(Color.BLACK);
             paint.setAntiAlias(true);
             paint.setTextSize(15);
-            if (isHead()) {
+           /* if (isHead()) {
                 c.drawText("Głowa: " + x + "|" + y, x + 50, y, paint);
             } else if (isTail()) {
                 RectF parentRc = parent.getPosition().Pos;
                 c.drawText("przedogon: " + parentRc, parent.x + 50, parent.y - 60, paint);
                 c.drawText("Ogon: " + getPosition().Pos, x + 50, y, paint);
-            }
+            }*/
         }
 
         private void PaintCherry(Canvas c) {
@@ -436,6 +451,7 @@ public class CustomView extends View {
             dsc.top -= 20;
             dsc.bottom += 20;
             c.drawBitmap(cherry_bmp, null, dsc, null);
+            PaintedRc=dsc;
 
         }
 
@@ -469,6 +485,7 @@ public class CustomView extends View {
                     break;
                 }
             }
+            PaintedRc=dsc;
         }
 
         private void PaintBody(Canvas c) {
@@ -482,74 +499,91 @@ public class CustomView extends View {
                 switch (direction) {
                     case RIGHT: {
                         dsc = GetRectF(posChild.Pos.right - 2, y, posParent.Pos.left + 2, y + height);
-                        lastPosition.Pos = dsc;
                         c.drawBitmap(c_poziom_bmp, null, dsc, null);
                         break;
                     }
                     case LEFT: {
                         dsc = GetRectF(posChild.Pos.left + 2, y, posParent.Pos.right - 2, y + height);
-                        lastPosition.Pos = dsc;
                         c.drawBitmap(c_poziom_bmp, null, dsc, null);
                         break;
                     }
                     case UP: {
                         dsc = GetRectF(x, posParent.Pos.bottom - 2, x + height, posChild.Pos.top + 2);
-                        lastPosition.Pos = dsc;
                         c.drawBitmap(c_pion_bmp, null, dsc, null);
                         break;
                     }
                     case DOWN: {
                         dsc = GetRectF(x, posParent.Pos.top + 2, x + height, posChild.Pos.bottom - 2);
-                        lastPosition.Pos = dsc;
                         c.drawBitmap(c_pion_bmp, null, dsc, null);
                         break;
                     }
                 }
+                PaintedRc=dsc;
+                lastPosition.Pos = dsc;
             }
+
         }
 
+
+
         private void PaintBodyCurve(Canvas c) {
-            Position p = this.getPosition(this.direction);
-            RectF rcParent = parent.getPosition().Pos;
+
+            Position p = this.getPosition();
+            RectF rcParent = parent.PaintedRc;
+
             switch (p.curve) {
                 case None:
                     break;
                 case L_D: {
-                    RectF r = new RectF(p.Pos.left, p.Pos.bottom, p.Pos.right, rcParent.top);
-                    c.drawBitmap(c_pion_bmp, null, r, null);
+                    RectF r = GetRectF_IfOk(p.Pos.left, p.Pos.bottom, p.Pos.right, rcParent.top);
+                    if(r!=null)
+                        c.drawBitmap(c_pion_bmp, null, r, null);
 
-                    r = new RectF(rcParent.right, p.Pos.top, p.Pos.left, p.Pos.bottom);//dopelnienie po lewej stronie
-                    c.drawBitmap(c_poziom_bmp, null, r, null);
+                    r = GetRectF_IfOk(rcParent.right, p.Pos.top, p.Pos.left, p.Pos.bottom);//dopelnienie po lewej stronie
+                    if(r!=null)
+                        c.drawBitmap(c_poziom_bmp, null, r, null);
 
                     c.drawBitmap(c_skret_ld_bmp, null, p.Pos, null);
 
                     break;
                 }
                 case L_U: {//lewa gora
-                    RectF r = new RectF(p.Pos.left, rcParent.bottom, p.Pos.right, p.Pos.top);
-                    c.drawBitmap(c_pion_bmp, null, r, null);//dopelnienie na gorze pionowe
-                    r = new RectF(rcParent.right, p.Pos.top, p.Pos.left, p.Pos.bottom);//dopelnienie po lewej stronie
-                    c.drawBitmap(c_poziom_bmp, null, r, null);
-                    c.drawBitmap(c_skret_lg_bmp, null, p.Pos, null);
+                    RectF r =GetRectF_IfOk(p.Pos.left, rcParent.bottom, p.Pos.right, p.Pos.top);
+                    if(r!=null)
+                        c.drawBitmap(c_pion_bmp, null, r, null);//dopelnienie na gorze pionowe
+
+                    r = GetRectF_IfOk(rcParent.right, p.Pos.top, p.Pos.left, p.Pos.bottom);//dopelnienie po lewej stronie
+                    if(r!=null)
+                        c.drawBitmap(c_poziom_bmp, null, r, null);
+                    c.drawBitmap(c_skret_lg1_bmp, null, p.Pos, null);
+
                     break;
                 }
                 case R_D: {
-                    RectF r = new RectF(p.Pos.left, p.Pos.bottom, p.Pos.right, rcParent.top);
-                    c.drawBitmap(c_pion_bmp, null, r, null);
-                    r = new RectF(p.Pos.right, p.Pos.top, rcParent.left, p.Pos.bottom);//dopelnienie po prawej stronie stronie
-                    c.drawBitmap(c_poziom_bmp, null, r, null);
+                    RectF r = GetRectF_IfOk(p.Pos.left, p.Pos.bottom, p.Pos.right, rcParent.top);
+                    if(r!=null)
+                        c.drawBitmap(c_pion_bmp, null, r, null);
+
+                    r = GetRectF_IfOk(p.Pos.right, p.Pos.top, rcParent.left, p.Pos.bottom);//dopelnienie po prawej stronie stronie
+                    if(r!=null)
+                        c.drawBitmap(c_poziom_bmp, null, r, null);
                     c.drawBitmap(c_skret_pd_bmp, null, p.Pos, null);
                     break;
                 }
                 case R_U: {
-                    RectF r = new RectF(p.Pos.left, rcParent.bottom, p.Pos.right, p.Pos.top);
-                    c.drawBitmap(c_pion_bmp, null, r, null);
-                    r = new RectF(p.Pos.right, p.Pos.top, rcParent.left, p.Pos.bottom);//dopelnienie po prawej stronie stronie
-                    c.drawBitmap(c_poziom_bmp, null, r, null);
+                    RectF r = GetRectF_IfOk(p.Pos.left, rcParent.bottom, p.Pos.right, p.Pos.top);
+                    if(r!=null)
+                        c.drawBitmap(c_pion_bmp, null, r, null);
+
+                    r = GetRectF_IfOk(p.Pos.right, p.Pos.top, rcParent.left, p.Pos.bottom);//dopelnienie po prawej stronie stronie
+                    if(r!=null)
+                        c.drawBitmap(c_poziom_bmp, null, r, null);
                     c.drawBitmap(c_skret_pg_bmp, null, p.Pos, null);
                     break;
                 }
             }
+            lastPosition.Pos=p.Pos;
+            PaintedRc=p.Pos;
         }
 
         private void PaintHead(Canvas c) {
@@ -572,6 +606,7 @@ public class CustomView extends View {
                     c.drawBitmap(g_d_bmp, null, pos, null);
                     break;
             }
+            PaintedRc=pos;
         }
 
         void setChangeDirection(EDIRECTION direction) {
