@@ -1,7 +1,9 @@
 package pl.szkolenie.projekty.animacja;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,6 +15,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -24,11 +27,12 @@ public class CustomView extends View {
             c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp, cherry_bmp, bk_bmp;
     static String TAG = "Animacja";
     int frame=0;
-    PartOfBodySnake Head;
+   PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody = new ArrayList<PartOfBodySnake>();
     PartOfBodySnake Food = new PartOfBodySnake(true, null);
     boolean isGameOver = false, isPause = false;
     int ptk = 0, rekord=0;
+    String nicknameRekord="", nick;
 
     public CustomView(Context context) {
         super(context);
@@ -52,6 +56,42 @@ public class CustomView extends View {
                 _y2 = Math.max(y1, y2);
 
         return new RectF(_x1, _y1, _x2, _y2);
+    }
+
+
+    void showDialogEnterName()
+    {
+        MainActivity.This.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.This);
+
+                final EditText edittext = new EditText(MainActivity.This);
+                alert.setMessage("Wprowadź pseudonim");
+               // alert.setTitle("Enter Your Title");
+
+                alert.setView(edittext);
+
+                alert.setPositiveButton("Wyślij nam swój wynik", new DialogInterface.OnClickListener() {
+
+
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        nick = edittext.getText().toString();
+                        sendScoreToServer();
+
+                    }
+                });
+
+                alert.setNegativeButton("Nie wysyłaj", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // what ever you want to do with No option.
+                    }
+                });
+
+                alert.show();
+            }
+        });
+
     }
 
     static RectF GetRectF_IfOk(float x1, float y1, float x2, float y2) {
@@ -109,10 +149,10 @@ public class CustomView extends View {
         HttpServ.GET(MainActivity.This, "http://192.168.137.1:8080/hiScore.php", null, onGetHiScoreFromServ);
     }
 
-    void sendScorToServer()
+    void sendScoreToServer()
     {
         ContentValues v=new ContentValues();
-        v.put("nickname", "adams1");
+        v.put("nickname", nick);
         v.put("mobileId", "sdfsdefkshdbfsdhbfjsdhbfsdbfjsdbfdsjvbf");
         v.put("value", ptk);
         HttpServ.GET(MainActivity.This, "http://192.168.137.1:8080/saveScore.php", v, onPostScoreToServ);
@@ -127,7 +167,7 @@ public class CustomView extends View {
     }
 
     public void GameOver() {
-        sendScorToServer();
+        showDialogEnterName();
         refreshHiScore();
         isGameOver = true;
     }
@@ -149,6 +189,7 @@ public class CustomView extends View {
         }
     };
 
+
     OnResponseFromServer onGetHiScoreFromServ =new OnResponseFromServer() {
         @Override
         public void Response(String html, boolean success, Exception e) {
@@ -157,6 +198,7 @@ public class CustomView extends View {
                 if (html != null &&  html.indexOf(";")>0) {
                    String [] s=html.split(";");
                     try {
+                        nicknameRekord = s[0];
                         rekord = Integer.parseInt(s[1]);
 
                     }
@@ -258,8 +300,13 @@ public class CustomView extends View {
                 p.setColor(Color.BLACK);
                 p.setTextSize(30);
                 p.setTextAlign(Paint.Align.LEFT);
-                c.drawText("Punkty: " + ptk, 25, 50, p);
-                c.drawText("Rekord: "+ rekord,25,75, p);
+                if(nick==null)
+                    c.drawText("Punkty: " + ptk, 25, 50, p);
+                else
+                    c.drawText(nick+": " + ptk, 25, 50, p);
+                if(nicknameRekord==null)
+                    nicknameRekord="";
+                c.drawText("Rekord: "+ rekord+" - "+nicknameRekord,25,75, p);
             }
 
             invalidate();
@@ -267,6 +314,8 @@ public class CustomView extends View {
 
         }
     }
+
+
 
     public void Start() {
         if (!Head.isAlive())
