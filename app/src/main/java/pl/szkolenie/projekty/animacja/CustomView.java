@@ -26,6 +26,7 @@ public class CustomView extends View {
             c_skret_lg1_bmp,
             c_skret_pg_bmp, g_g_bmp, g_l_bmp, g_p_bmp, o_d_bmp, o_g_bmp, o_l_bmp, o_p_bmp, cherry_bmp, bk_bmp;
     static String TAG = "Animacja";
+    boolean CPU=true;
     int frame=0;
    PartOfBodySnake Head;
     ArrayList<PartOfBodySnake> SnakeBody = new ArrayList<PartOfBodySnake>();
@@ -67,6 +68,8 @@ public class CustomView extends View {
                 AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.This);
 
                 final EditText edittext = new EditText(MainActivity.This);
+                if (nick!=null)
+                    edittext.setText(nick);
                 alert.setMessage("Wprowadź pseudonim");
                // alert.setTitle("Enter Your Title");
 
@@ -167,9 +170,13 @@ public class CustomView extends View {
     }
 
     public void GameOver() {
-        showDialogEnterName();
+        if (!CPU)
+            showDialogEnterName();
         refreshHiScore();
-        isGameOver = true;
+        if (!CPU)
+            isGameOver = true;
+        else
+            Start();
     }
 
 
@@ -178,14 +185,15 @@ public class CustomView extends View {
         @Override
         public void Response(String html, boolean success, Exception e) {
 
-            if (success) {
-                if (html != null && html.equals("1")) {
-                    Toast.makeText(MainActivity.This, "Wysłano wyniki na serwer", Toast.LENGTH_LONG).show();
-                }
-            } else if (e != null) {
-                Toast.makeText(MainActivity.This, "Wystąpił następujący błąd: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            } else
-                Toast.makeText(MainActivity.This, "Wystąpił błąd, którego programista nie przewidział!", Toast.LENGTH_LONG).show();
+
+                if (success) {
+                    if (html != null && html.equals("1")) {
+                        Toast.makeText(MainActivity.This, "Wysłano wyniki na serwer", Toast.LENGTH_LONG).show();
+                    }
+                } else if (e != null) {
+                    Toast.makeText(MainActivity.This, "Wystąpił następujący błąd: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                } else
+                    Toast.makeText(MainActivity.This, "Wystąpił błąd, którego programista nie przewidział!", Toast.LENGTH_LONG).show();
         }
     };
 
@@ -386,57 +394,126 @@ public class CustomView extends View {
             if (parent != null)
                 parent.child = this;
         }
+        int margin=15;
+
+        void setDirectionRandom(boolean left,boolean right,boolean up,boolean down)
+        {
+            if (!left && !right && !up && !down)
+                return ;
+
+            while(true)
+            {
+                Log.d(MainActivity.TAG, "setDirectionRandom");
+                Random r=new Random();
+                int i=r.nextInt(4);
+                switch(i)
+                {
+                    case 0:
+                        if(left)
+                           Left();
+                        return;
+                    case 1:
+                        if(right)
+                           Right();
+                        return;
+                    case 2:
+                        if(up)
+                            Up();
+                        return;
+                    case 3:
+                        if(down)
+                            Down();
+                        return;
+                }
+            }
+        }
+        int c=100;
+        private void cpuControl()
+        {
+            c--;
+            if (c<0)
+            {
+                setDirectionRandom(true, true, true, true);
+                Random r=new Random();
+                c=r.nextInt(50)+50;
+            }
+            switch (direction) {
+                case RIGHT:
+                    if (x > getWidth() - (width+margin))
+                       setDirectionRandom(false, false, true, true);
+
+
+                    break;
+                case LEFT:
+                    if (x < margin)
+                        setDirectionRandom(false, false, true, true);
+
+                    break;
+                case UP:
+                    if (y < margin)
+                        setDirectionRandom(true, true, false, false);
+
+                    break;
+                case DOWN:
+                    if (y > getHeight()-margin)
+                        setDirectionRandom(true, true, false, false);
+                    break;
+            }
+        }
+
 
         @Override
         public void run() {
 
             while (runGame) {
                 if (!isGameOver && !isPause) {
-                    if (parent == null) {
-                        switch (direction) {
-                            case RIGHT:
-                                if (x > getWidth() - width)
-                                    GameOver();
-                                else
-                                    x += v;
-                                break;
-                            case LEFT:
-                                if (x < 0)
-                                    GameOver();
-                                else
-                                    x -= v;
-                                break;
-                            case UP:
-                                if (y < 0)
-                                    GameOver();
-                                else
-                                    y -= v;
-                                break;
-                            case DOWN:
-                                if (y > getHeight())
-                                    GameOver();
-                                else
-                                    y += v;
-                                break;
-                        }
+                    if (CPU) {
+                        this.cpuControl();
                     }
+                    switch (direction) {
+                        case RIGHT:
+                            if (x > getWidth() - width)
+                                GameOver();
+                            else
+                                x += v;
+                            break;
+                        case LEFT:
+                            if (x < 0)
+                                GameOver();
+                            else
+                                x -= v;
+                            break;
+                        case UP:
+                            if (y < 0)
+                                GameOver();
+                            else
+                                y -= v;
+                            break;
+                        case DOWN:
+                            if (y > getHeight())
+                                GameOver();
+                            else
+                                y += v;
+                            break;
+                    }
+
 
                     int i = 0;
 
                     //ustawianie pozostalych elemenow weza
-                   try {
-                       for (PartOfBodySnake p : SnakeBody) {
-                           if (p.parent != null)
-                               p.refreshPositionBody();
-                           if (i > 1)
-                               if (isColision(p, v)) {
-                                   GameOver();
+                    try {
+                        for (PartOfBodySnake p : SnakeBody) {
+                            if (p.parent != null)
+                                p.refreshPositionBody();
+                            if (i > 1)
+                                if (isColision(p, v)) {
+                                    GameOver();
 
-                               }
-                           i++;
-                       }
-                   }
-                   catch(Exception ex){}
+                                }
+                            i++;
+                        }
+                    } catch (Exception ex) {
+                    }
 
                     if (isColision(Food, 0) && !Food.colisionDetect) {
 
@@ -446,8 +523,8 @@ public class CustomView extends View {
                         PartOfBodySnake last = SnakeBody.get(SnakeBody.size() - 1);//pobieramy ogon
                         last.Add();
                         Random g = new Random();
-                        Food.x = g.nextInt(getWidth()-50);
-                        Food.y = g.nextInt(getHeight()-50);
+                        Food.x = g.nextInt(getWidth() - 50);
+                        Food.y = g.nextInt(getHeight() - 50);
                         ptk += g.nextInt(25);
 
                     } else if (!isColision(Food, 0))
@@ -462,6 +539,7 @@ public class CustomView extends View {
                 }
             }
         }
+
 
         public PartOfBodySnake Add() {
 
