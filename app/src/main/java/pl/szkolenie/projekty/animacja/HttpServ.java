@@ -19,11 +19,17 @@ import java.util.Set;
 
 public class HttpServ extends Thread {
     private final Activity Context;
-    private String address, result;
+    private String address;
     private ContentValues postParam;
     private OnResponseFromServer responseListener;
+
+    public static void GET(Activity context, String address, ContentValues postParam, OnResponseFromServer responseListener)
+    {
+        new HttpServ(context, address, postParam, responseListener);
+    }
+
     //constructor
-    public HttpServ(Activity context, String address, ContentValues postParam, OnResponseFromServer responseListener) {
+    private HttpServ(Activity context, String address, ContentValues postParam, OnResponseFromServer responseListener) {
         super();
         this.postParam=postParam;
         this.address=address;
@@ -50,8 +56,8 @@ public class HttpServ extends Thread {
     public void run() {
 
         try {
-            this.result= getResponseFromServer(this.address, this.postParam);
-            response(this.result, true, null);
+            String result= getResponseFromServer(this.address, this.postParam);
+            response(result, true, null);
         } catch (Exception e) {
             String error="";
             if(e!=null)
@@ -72,11 +78,6 @@ public class HttpServ extends Thread {
                 }
             }
         });
-    }
-
-    public String GetResult()
-    {
-        return  this.result;
     }
 
     private String getResponseFromServer(String address, ContentValues vals) throws Exception {

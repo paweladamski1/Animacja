@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -34,23 +33,6 @@ public class MainActivity extends Activity {
                 gameView.Start();
             }
         });
-
-        HttpServ t=new HttpServ(this, "http://192.168.137.1:8080/", null, new OnResponseFromServer()
-            {
-                @Override
-                public void Response(String html, boolean success,  Exception e) {
-                    if(success)
-                        Toast.makeText(MainActivity.This, "Ok", Toast.LENGTH_LONG).show();
-                    else
-                    if(e!=null)
-                    {
-                        Toast.makeText(MainActivity.This, "Wystąpił następujący błąd: "+e.getMessage(), Toast.LENGTH_LONG).show();
-                    }else
-                        Toast.makeText(MainActivity.This, "Wystąpił błąd, którego programista nie przewidział!", Toast.LENGTH_LONG).show();
-                }
-            }
-        );
-
     }
 
     @Override

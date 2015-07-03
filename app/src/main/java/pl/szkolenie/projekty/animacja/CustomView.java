@@ -1,5 +1,6 @@
 package pl.szkolenie.projekty.animacja;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -26,7 +28,7 @@ public class CustomView extends View {
     ArrayList<PartOfBodySnake> SnakeBody = new ArrayList<PartOfBodySnake>();
     PartOfBodySnake Food = new PartOfBodySnake(true, null);
     boolean isGameOver = false, isPause = false;
-    int ptk = 0;
+    int ptk = 0, rekord=0;
 
     public CustomView(Context context) {
         super(context);
@@ -99,7 +101,22 @@ public class CustomView extends View {
 
         isGameOver = false;
         ptk = 0;
+        refreshHiScore();
     }
+
+    void refreshHiScore()
+    {
+        HttpServ.GET(MainActivity.This, "http://192.168.137.1:8080/hiScore.php", null, onGetHiScoreFromServ);
+    }
+
+    void sendScorToServer()
+    {
+        ContentValues v=new ContentValues();
+        v.put("nickname", "adams1");
+        v.put("mobileId", "sdfsdefkshdbfsdhbfjsdhbfsdbfjsdbfdsjvbf");
+        v.put("value", ptk);
+        HttpServ.GET(MainActivity.This, "http://192.168.137.1:8080/saveScore.php", v, onPostScoreToServ);
+   }
 
     Bitmap LoadBitmap(int resource) {
         try {
@@ -110,8 +127,49 @@ public class CustomView extends View {
     }
 
     public void GameOver() {
+        sendScorToServer();
+        refreshHiScore();
         isGameOver = true;
     }
+
+
+
+    OnResponseFromServer onPostScoreToServ =new OnResponseFromServer() {
+        @Override
+        public void Response(String html, boolean success, Exception e) {
+
+            if (success) {
+                if (html != null && html.equals("1")) {
+                    Toast.makeText(MainActivity.This, "Wysłano wyniki na serwer", Toast.LENGTH_LONG).show();
+                }
+            } else if (e != null) {
+                Toast.makeText(MainActivity.This, "Wystąpił następujący błąd: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            } else
+                Toast.makeText(MainActivity.This, "Wystąpił błąd, którego programista nie przewidział!", Toast.LENGTH_LONG).show();
+        }
+    };
+
+    OnResponseFromServer onGetHiScoreFromServ =new OnResponseFromServer() {
+        @Override
+        public void Response(String html, boolean success, Exception e) {
+
+            if (success) {
+                if (html != null &&  html.indexOf(";")>0) {
+                   String [] s=html.split(";");
+                    try {
+                        rekord = Integer.parseInt(s[1]);
+
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
+
+                   //Toast.makeText(MainActivity.This, "Wysłano wyniki na serwer", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    };
 
     public void SetPause() {
         this.isPause = !this.isPause;
@@ -187,7 +245,8 @@ public class CustomView extends View {
                 p.setTextSize(60);
                 p.setTextAlign(Paint.Align.CENTER);
                 c.drawText("Game Over", getWidth() / 2, getHeight() / 2, p);
-                c.drawText("Zdobyłeś(aś)"+ptk+" ptk.", getWidth() / 2, getHeight() / 2+50, p);
+                c.drawText("Zdobyłeś(aś)" + ptk + " ptk.", getWidth() / 2, getHeight() / 2 + 50, p);
+
             } else if (isPause) {
                 Paint p = new Paint();
                 p.setColor(Color.GRAY);
@@ -200,6 +259,7 @@ public class CustomView extends View {
                 p.setTextSize(30);
                 p.setTextAlign(Paint.Align.LEFT);
                 c.drawText("Punkty: " + ptk, 25, 50, p);
+                c.drawText("Rekord: "+ rekord,25,75, p);
             }
 
             invalidate();
